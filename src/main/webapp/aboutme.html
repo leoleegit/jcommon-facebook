@@ -1,0 +1,15 @@
+<html>
+<head>
+<script type="text/javascript" src="js/jquery.min-1.7.2.js"></script>
+<script type="text/javascript" src="jcommon.facebook/jcommon-facebook.js"></script>
+<script type="text/javascript">
+jcommonfacebook.onAboutMe=function(arg0,arg1){
+	document.getElementById("info").innerHTML = "name:"+arg1.name + "</br>id:"+arg1.id;
+}
+</script>
+</head>
+
+<body>
+<div id="info"></div>
+</body>
+</html>
