@@ -14,6 +14,7 @@ package org.jcommon.com.facebook;
 
 import java.io.File;
 import org.jcommon.com.facebook.data.App;
+import org.jcommon.com.facebook.utils.FacebookType;
 import org.jcommon.com.util.JsonUtils;
 import org.jcommon.com.util.http.FileRequest;
 import org.jcommon.com.util.http.HttpListener;
@@ -119,11 +120,11 @@ public class RequestFactory
     return new HttpRequest(url, listener, trusted);
   }
 
-  public static HttpRequest createGetAccessSecretReqeust(HttpListener listener, String permissions, App app) {
+  public static HttpRequest createGetAccessSecretReqeust(HttpListener listener, App app) {
     String url = graph_url + "oauth/access_token?client_id=" + app.getApi_id();
     String[] keys = { "client_id", "client_secret", "scope", "response_type", "type" };
 
-    String[] values = { app.getApi_id(), app.getApp_secret(), permissions, "token", "client_cred" };
+    String[] values = { app.getApi_id(), app.getApp_secret(), app.getPermissions(), "token", "client_cred" };
 
     String content = JsonUtils.toParameter(keys, values);
     return new HttpRequest(url, content, HttpRequest.POST, listener, trusted);
@@ -234,12 +235,20 @@ public class RequestFactory
     return new HttpRequest(url, listener, trusted);
   }
   
-  public static HttpRequest createSubscriptionReqeust(HttpListener listener, String access_secret, String page_id, String callback_url){
+  public static HttpRequest createSubscriptionReqeust(HttpListener listener, App app, String page_id, String callback_url,FacebookType type){
 	String[] keys   = { "access_token","callback_url","object","fields","verify_token","active","method"};
-    String[] values = { access_secret, callback_url, "user", "feed", FacebookMonitor.monitor_key, "true",HttpRequest.POST };
+    String[] values = { app.getAccess_token(), callback_url, type.toString(), "feed", app.getVerify_token(), "true",HttpRequest.POST };
     String url = graph_url + version + "/" + page_id + "/subscriptions";
     url = JsonUtils.toRequestURL(url, keys, values);
     return new HttpRequest(url, listener, trusted);
+  }
+  
+  public static HttpRequest createDelSubscriptionReqeust(HttpListener listener, String app_access_token, String page_id, FacebookType type){
+		String[] keys   = { "access_token","object","fields","method"};
+	    String[] values = { app_access_token,  type.toString(), "feed",HttpRequest.DELETE };
+	    String url = graph_url + version + "/" + page_id + "/subscriptions";
+	    url = JsonUtils.toRequestURL(url, keys, values);
+	    return new HttpRequest(url, listener, trusted);
   }
   
   public static HttpRequest createGetReqeustByFql(HttpListener listener, String access_token, String fql) {	   

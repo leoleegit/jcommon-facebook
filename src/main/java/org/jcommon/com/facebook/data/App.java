@@ -18,6 +18,8 @@ public class App
   private String app_secret;
   private String app_link;
   private String permissions;
+  private String access_token;
+  private String verify_token = "jcommon-facebook";
 
   public App(String api_id, String app_secret)
   {
@@ -55,5 +57,27 @@ public class App
 	
   public String getApp_link() {
 	return app_link;
+  }
+
+  public void setAccess_token(String access_token) {
+	this.access_token = access_token;
+  }
+
+  public String getAccess_token() {
+	return access_token;
+  }
+
+  public void setVerify_token(String verify_token) {
+	this.verify_token = verify_token;
+  }
+
+  public String getVerify_token() {
+	return verify_token;
+  }
+  
+  public boolean appVerify(String hub_challenge,String hub_verify_token,String hub_mode){
+	  if("subscribe".equals(hub_mode) && (verify_token!=null && verify_token.equals(hub_verify_token)))
+		  return true;
+	  return false;
   }
 }

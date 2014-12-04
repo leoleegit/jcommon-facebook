@@ -10,15 +10,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // ========================================================================
-package org.jcommon.com.facebook.seesion;
+package org.jcommon.com.facebook;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.log4j.Logger;
-import org.jcommon.com.facebook.PageListener;
-import org.jcommon.com.facebook.RequestCallback;
-import org.jcommon.com.facebook.RequestFactory;
 import org.jcommon.com.facebook.cache.CallbackCache;
 import org.jcommon.com.facebook.cache.DataCache;
 import org.jcommon.com.facebook.cache.SessionCache;
@@ -28,6 +25,9 @@ import org.jcommon.com.facebook.data.Comment;
 import org.jcommon.com.facebook.data.Error;
 import org.jcommon.com.facebook.data.Feed;
 import org.jcommon.com.facebook.data.Message;
+import org.jcommon.com.facebook.seesion.FeedMonitor;
+import org.jcommon.com.facebook.seesion.MessageMonitor;
+import org.jcommon.com.facebook.seesion.PageCallback;
 import org.jcommon.com.facebook.utils.DataType;
 import org.jcommon.com.facebook.utils.FacebookType;
 import org.jcommon.com.facebook.utils.FacebookUtils;
@@ -40,11 +40,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class FacebookSession
-  implements PageCallback, HttpListener, Session
+  implements PageCallback, HttpListener
 {
   protected Logger logger = Logger.getLogger(getClass());
   public static boolean debug;
-  private String page_id;
+  protected String facebook_id;
   private String access_token;
   private FacebookType type;
   private MessageMonitor message_monitor;
@@ -55,9 +55,8 @@ public class FacebookSession
   private BaseUser me;
   private boolean monitoring;
 
-  public FacebookSession(String page_id, String access_token, PageListener listnener)
-  {
-    this.page_id = page_id;
+  public FacebookSession(String facebook_id, String access_token, PageListener listnener){
+    this.facebook_id = facebook_id;
     this.access_token = access_token;
     addListnener(listnener);
   }
@@ -65,12 +64,12 @@ public class FacebookSession
   public void login(FacebookType type) {
 	  setType(type);
 	  startMonitor();
-      SessionCache.instance().addSession(this.page_id, this);
+      SessionCache.instance().addSession(this.facebook_id, this);
   }
 
   public void logout() {
 	  stopMonitor();
-      SessionCache.instance().removeSession(this.page_id);
+      SessionCache.instance().removeSession(this.facebook_id);
   }
   
   public void stopMonitor(){
@@ -81,22 +80,30 @@ public class FacebookSession
 		    this.feed_monitor.setListener(null);
 		    this.message_monitor = null;
 		    this.feed_monitor = null;
+	  }else if(FacebookType.message == type && monitoring){  
+		    this.message_monitor.shutdown();
+		    this.message_monitor.setListener(null);
+		    this.message_monitor = null;
 	  }
 	  monitoring = false;
   }
   
   public void startMonitor(){
 	  if(FacebookType.page == type && !monitoring){
-		   this.message_monitor = new MessageMonitor(this.page_id, this.access_token);
-		   this.feed_monitor = new FeedMonitor(this.page_id, this.access_token);
-
+		   this.message_monitor = new MessageMonitor(this.facebook_id, this.access_token);
+		   this.feed_monitor = new FeedMonitor(this.facebook_id, this.access_token);
 		   this.message_monitor.startup();
 		   this.feed_monitor.startup(); 
 		   this.message_monitor.setListener(this);
 		   this.feed_monitor.setListener(this);
 		   monitoring = true;
+	  }else  if(FacebookType.message == type && !monitoring){
+		   this.message_monitor = new MessageMonitor(this.facebook_id, this.access_token);
+		   this.message_monitor.startup();
+		   this.message_monitor.setListener(this);
+		   monitoring = true;
 	  }
-	  logger.info(String.format("FacebookType:%s;id:%s;access_token:%s",type,page_id,access_token));
+	  logger.info(String.format("FacebookType:%s;id:%s;access_token:%s",type,facebook_id,access_token));
   }
 
   public HttpRequest postPhoto2Wall(RequestCallback callback, File file, String message, boolean start_upload) {
@@ -138,7 +145,7 @@ public class FacebookSession
   }
 
   public HttpRequest postVideo2Wall(RequestCallback callback, File file, String title, String description,  String access_token, boolean start_upload) {
-    HttpRequest request = RequestFactory.createPostVideoRequest(this, this.page_id, file, title, description,  access_token);
+    HttpRequest request = RequestFactory.createPostVideoRequest(this, this.facebook_id, file, title, description,  access_token);
     CallbackCache.instance().addCallback(request, callback);
     if (start_upload)
       ThreadManager.instance().execute(request);
@@ -146,7 +153,7 @@ public class FacebookSession
   }
 
   public HttpRequest postFeed2Wall(RequestCallback callback, String message, String link, String picture, String name, String caption, String description, String access_token) {
-    HttpRequest request = RequestFactory.createPostRequest(this, this.page_id, message, link, picture, name, caption, description, access_token);
+    HttpRequest request = RequestFactory.createPostRequest(this, this.facebook_id, message, link, picture, name, caption, description, access_token);
     CallbackCache.instance().addCallback(request, callback);
     ThreadManager.instance().execute(request);
     return request;
@@ -185,7 +192,7 @@ public class FacebookSession
   }
 
   public Album getWallAlbum() {
-    HttpRequest request = RequestFactory.createGetAlbumReqeust(null, this.page_id, this.access_token, null);
+    HttpRequest request = RequestFactory.createGetAlbumReqeust(null, this.facebook_id, this.access_token, null);
     request.run();
     String data = request.getResult();
     JSONObject jsonO = JsonUtils.getJSONObject(data);
@@ -361,12 +368,12 @@ public class FacebookSession
 
   public String getSessionID()
   {
-    return this.page_id;
+    return this.facebook_id;
   }
   
   public void setSessionID(String session)
   {
-    this.page_id = session;
+    this.facebook_id = session;
   }
 
   public String getAccessToken()
@@ -402,7 +409,67 @@ public class FacebookSession
 	}
 	return me;
   }
+  
   public void setWall_album_id(String wall_album_id) {
 		this.wall_album_id = wall_album_id;
   }
+
+  public void setAccessToken(String access_token) {
+		// TODO Auto-generated method stub
+		this.access_token = access_token;
+		if(message_monitor!=null)
+			message_monitor.setAccessToken(access_token);
+		if(feed_monitor!=null)
+			feed_monitor.setAccessToken(access_token);
+  }
+  
+	public void onCallback(String data){
+		JSONObject jsonO = JsonUtils.getJSONObject(data);	
+		try{
+			if(!"page".equalsIgnoreCase(jsonO!=null&&jsonO.has("object")?jsonO.getString("object"):null))
+				return;
+			if(jsonO!=null && jsonO.has("entry")){
+				JSONArray jsonA = jsonO.getJSONArray("entry");
+				for(int i=0; i<jsonA.length(); i++){
+					check(jsonA.getJSONObject(i));
+				}
+			}
+		}catch(JSONException e){
+			logger.error("", e);
+		}
+	}
+	
+	public void check(JSONObject jsonO) throws JSONException {
+		// TODO Auto-generated method stub
+	    String id = jsonO.has("id")?jsonO.getString("id"):null;
+	    if(id==null || !id.equals(this.facebook_id))return;
+	    
+	    JSONArray jsonA = jsonO.has("changes")?jsonO.getJSONArray("changes"):null;
+		if(jsonA==null)return;
+		for(int i=0; i<jsonA.length(); i++){
+			jsonO = jsonA.getJSONObject(i);
+			if(!jsonO.has("field") || !"feed".equals(jsonO.getString("field"))){
+				continue;
+			}
+			if(jsonO.has("value"))
+				jsonO = jsonO.getJSONObject("value");
+			//check comment update
+			if(!jsonO.has("item") || !"comment".equals(jsonO.getString("item"))){
+				continue;
+			}
+			String comment_id = jsonO.has("comment_id")?jsonO.getString("comment_id"):null;
+			String post_id    = jsonO.has("parent_id")?jsonO.getString("parent_id"):null;
+			if(comment_id!=null && post_id!=null){
+				String access_token = getAccessToken();
+				HttpRequest request = RequestFactory.createGetDetailRequest(null, post_id, null, access_token);
+				request.run();
+				JSONObject json_post = JsonUtils.getJSONObject(request.getResult());
+				
+				request = RequestFactory.createGetDetailRequest(null, comment_id, null, access_token);
+				request.run();
+				JSONObject json_comment = JsonUtils.getJSONObject(request.getResult());
+				onComment(json_post, json_comment);
+			}
+		}
+	}
 }

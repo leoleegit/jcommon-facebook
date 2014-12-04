@@ -16,7 +16,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.jcommon.com.facebook.seesion.Session;
+
+import org.jcommon.com.facebook.FacebookSession;
 import org.jcommon.com.facebook.utils.FacebookType;
 import org.jcommon.com.util.collections.MapStore;
 
@@ -26,43 +27,43 @@ public class SessionCache extends MapStore
 
   public static SessionCache instance() { return instance; }
 
-  public void addSession(String sessionID, Session session) {
+  public void addSession(String sessionID, FacebookSession session) {
     if (super.hasKey(sessionID))
       super.updateOne(sessionID, session);
     else
       super.addOne(sessionID, session);
   }
 
-  public Session getSession(String sessionID) {
+  public FacebookSession getSession(String sessionID) {
     if (super.hasKey(sessionID))
-      return (Session)super.getOne(sessionID);
+      return (FacebookSession)super.getOne(sessionID);
     return null;
   }
 
-  public Session removeSession(String sessionID) {
+  public FacebookSession removeSession(String sessionID) {
     if (super.hasKey(sessionID))
-      return (Session)super.removeOne(sessionID);
+      return (FacebookSession)super.removeOne(sessionID);
     return null;
   }
 
-  public List<Session> getPageSession() {
+  public List<FacebookSession> getPageSession() {
     return getSessionByType(FacebookType.page);
   }
 
-  public List<Session> getUserSession() {
+  public List<FacebookSession> getUserSession() {
     return getSessionByType(FacebookType.user);
   }
   
-  public List<Session> getFacebookSession() {
+  public List<FacebookSession> getFacebookSession() {
 	    return getSessionByType(null);
   }
 
-  private List<Session> getSessionByType(FacebookType type) {
-    List<Session> sessions = new ArrayList<Session>();
+  private List<FacebookSession> getSessionByType(FacebookType type) {
+    List<FacebookSession> sessions = new ArrayList<FacebookSession>();
     Map<Object, Object> all = super.getAll();
     for (Iterator<?> i$ = all.values().iterator(); i$.hasNext(); ) { 
       Object o = i$.next();
-      Session session = (Session)o;
+      FacebookSession session = (FacebookSession)o;
       if (type==null || session.getType() == type)
         sessions.add(session);
     }

@@ -64,6 +64,11 @@ public class MessageMonitor extends RequestCallback
     this.logger.info(this.page_id + "running ...");
   }
 
+  public void setAccessToken(String access_token) {
+		// TODO Auto-generated method stub
+		this.access_token = access_token;
+  }
+  
   public void shutdown() {
     TempFileCache.saveFacebookFixCache(this.message_list, prefix, suffix);
     if (this.timer != null) {

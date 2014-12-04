@@ -22,6 +22,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import org.apache.log4j.Logger;
+import org.jcommon.com.facebook.FacebookSession;
 import org.jcommon.com.facebook.RequestFactory;
 import org.jcommon.com.facebook.utils.FacebookUtils;
 import org.jcommon.com.facebook.utils.FixMap;
@@ -58,6 +59,10 @@ public class FeedMonitor extends RequestCallback
     prefix = "jcomconfacebook" + "-" + page_id;
   }
 
+  public void setAccessToken(String access_token) {
+		// TODO Auto-generated method stub
+		this.access_token = access_token; 
+  }
   public void startup() {
     this.run = true;
     TempFileCache.loadFacebookFixCache(this.post_list, prefix, suffix);

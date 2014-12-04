@@ -15,7 +15,7 @@ package org.jcommon.com.facebook.seesion;
 import java.util.List;
 import org.json.JSONObject;
 
-abstract interface PageCallback
+public abstract interface PageCallback
 {
   public abstract void onPosts(JSONObject paramJSONObject);
 

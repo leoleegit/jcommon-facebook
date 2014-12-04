@@ -16,7 +16,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
+
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -40,13 +43,21 @@ public class GetAccessToken extends ResourceServlet
 {
   private static final long serialVersionUID = 1L;
   private static Logger logger = Logger.getLogger(GetAccessToken.class);
-  public static URL init_file_is = null;//GetAccessToken.class.getResource("/facebook-log4j.xml");
+  public static URL init_file_is = GetAccessToken.class.getResource("/facebook-log4j.xml");
 
   public void init(ServletConfig config)
     throws ServletException
   {
     super.init(config);
     logger.info("JcommonFacebook running ...");
+  }
+  
+  public void addApp(String app_name, String api_id, String app_secret, String permissions)
+  {
+    App app = new App(api_id, app_secret);
+    logger.info(api_id);
+    app.setPermissions(permissions);
+    AppCache.instance().addApp(app_name, app);
   }
   
   final String[] files = {"help.PNG","access_token.html"};
@@ -80,6 +91,7 @@ public class GetAccessToken extends ResourceServlet
     String id = request.getParameter("id");
     String name = request.getParameter("name");
     String all = request.getParameter("all");
+    String redirect_uri = request.getParameter("redirect_uri");
     logger.info(String.format("id:%s ,name:%s", new Object[] { id, name }));
     try {
       Error error = new Error();
@@ -90,40 +102,49 @@ public class GetAccessToken extends ResourceServlet
         return;
       }
 
-      String redirect_uri = getRequestURL(request);
+      redirect_uri = redirect_uri==null?getRequestURL(request):redirect_uri;
       logger.info("Request URL:" + redirect_uri);
 
       String code = request.getParameter("code");
+      logger.info("code:" + code);
       if (code == null) {
+    	
+
         String url = RequestFactory.createGetAccessCodeUrl(redirect_uri, app.getPermissions(), app);
         response.sendRedirect(url);
       } else {
         HttpRequest facebook_request = RequestFactory.createGetAccessTokenReqeust(null, code, redirect_uri, app);
         facebook_request.run();
-        String access_token = facebook_request.getResult();
-        if ((access_token != null) && (access_token.startsWith("access_token="))) {
-          access_token = access_token.replaceAll("access_token=", "");
+        String access_token_ = facebook_request.getResult();
+        if ((access_token_ != null) && (access_token_.startsWith("access_token="))) {
+        	access_token_ = access_token_.replaceAll("access_token=", "");
         } else {
-          error.setMessage("get access_token error:" + access_token);
+          error.setMessage("get access_token error:" + access_token_);
           response.getWriter().println(error.toJsonStr());
           return;
         }
-        logger.info(access_token);
-        if ((access_token != null) && (access_token.indexOf("&") != -1)) {
-          access_token = access_token.substring(0, access_token.indexOf("&"));
+        logger.info("access_token_:"+access_token_);
+        AccessToken at = new AccessToken();
+        if ((access_token_ != null) && (access_token_.indexOf("&") != -1)) {
+          String access_token = access_token_.substring(0, access_token_.indexOf("&"));
+          String expires = (access_token_.indexOf("expires=") != -1)?access_token_.substring(access_token_.indexOf("=")+1):"0";
+          at.setAccess_token(access_token);
+          at.setExpired(expires);
+        }else{
+        	at.setAccess_token(access_token_);
+        	at.setExpired("0");
         }
         if ((id == null) && (name == null) && (all == null)) {
-        	 AccessToken at = new AccessToken();
-        	 facebook_request = RequestFactory.createGetAboutMeReqeust(null, access_token);
+        	 facebook_request = RequestFactory.createGetAboutMeReqeust(null, at.getAccess_token());
              facebook_request.run();
              BaseUser user    = new BaseUser(facebook_request.getResult());
              at.setId(user.getId());
              at.setName(user.getName());
-             at.setAccess_token(access_token);
+             logger.info(at.toJsonStr());
              response.getWriter().println(at.toJsonStr());
              return;
         }
-        facebook_request = RequestFactory.createGetAllAccessTokenReqeust(null, access_token);
+        facebook_request = RequestFactory.createGetAllAccessTokenReqeust(null, at.getAccess_token());
         facebook_request.run();
         String data = facebook_request.getResult();
         JSONObject jsonO = JsonUtils.getJSONObject(data);
@@ -140,25 +161,46 @@ public class GetAccessToken extends ResourceServlet
             return;
           }
 
-          response.getWriter().println("[");
+          List<AccessToken> resp = new ArrayList<AccessToken>();
           for (int i = 0; i < arr.length(); i++) {
             String access_token_data = arr.getString(i);
             AccessToken access_token_app = new AccessToken(access_token_data);
             logger.info(access_token_app.getId() + ":" + access_token_app.getAccess_token());
             if (all != null) {
-              response.getWriter().println(access_token_app.getJsonData());
+              resp.add(access_token_app);
               if(i!=(arr.length()-1))
             	  response.getWriter().println(",");
             }
             else if (((id != null) && (id.equals(access_token_app.getId()))) || ((name != null) && (id.equals(access_token_app.getName())))) {
-              response.getWriter().println(access_token_app.getJsonData());
+              resp.add(access_token_app);
               break;
             }
           }
-          response.getWriter().println("]");
-          if (all == null && id==null) {
+          StringBuilder resp_str = new StringBuilder();
+          if(resp.size()>1){
+        	  resp_str.append("[");
+        	  for(AccessToken at_ : resp){
+        		  resp_str.append(at_.getJsonData()).append(",");
+        	  }
+        	  resp_str.deleteCharAt(resp_str.length()-1);
+        	  resp_str.append("]");
+        	  response.getWriter().println(resp_str);
+        	  return;
+          }else if(resp.size()>0){
+        	  for(AccessToken at_ : resp){
+        		  resp_str.append(at_.getJsonData());
+        	  }
+        	  response.getWriter().println(resp_str);
+        	  return;
+          }
+          
+          
+          if (id!=null) {
             error.setMessage("get access_token error: can't find map access_token for " + id);
             response.getWriter().println(error.toJsonStr());
+          } else if (all!=null) {
+              error.setMessage("get access_token error: can't find any access_token");
+              response.getWriter().println(error.toJsonStr());
           }
         }
         catch (JSONException e) {
@@ -180,7 +222,8 @@ public class GetAccessToken extends ResourceServlet
     Enumeration<?> names = request.getParameterNames();
     while (names.hasMoreElements()) {
       String name = (String)names.nextElement();
-      sb.append(name).append("=").append(request.getParameter(name)).append("&");
+      if(!"code".equalsIgnoreCase(name))
+    	  sb.append(name).append("=").append(request.getParameter(name)).append("&");
     }
 
     if ((sb.lastIndexOf("&") == sb.length() - 1) && (sb.length() > 0))

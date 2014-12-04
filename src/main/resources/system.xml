@@ -3,10 +3,9 @@
 	<system_object key="0" value="org.jcommon.com.util.jmx.JmxManager" />
 	<system_object key="1" value="org.jcommon.com.util.share.ShareManager" />
 	<system_object key="1" value="org.jcommon.com.facebook.FacebookManager" />
-	<system_object key="2" value="org.jcommon.com.facebook.test.GetAccessTokenTest" />
 	<system_object key="3" value="org.jcommon.com.facebook.test.PageSessionTest" />
 	<init_threads>500</init_threads>
-	<version>20121111</version>
+	<version>20141204</version>
 	<mbean_server>jcommon_facebook_server</mbean_server>
 	<htmladapter user="admin" password="admin" port="10046" />
 	<!--  <ShareObject rmi="rmiadapter" name="ShareObject" role="client" CREDENTIALS="ptsws" addr="127.0.0.1" port="10043" />-->

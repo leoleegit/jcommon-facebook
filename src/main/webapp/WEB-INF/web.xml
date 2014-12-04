@@ -50,7 +50,7 @@
 	    <description>FacebookMonitor</description>
 	    <display-name>FacebookMonitor</display-name>
 	    <servlet-name>FacebookMonitor</servlet-name>
-	    <servlet-class>org.jcommon.com.facebook.FacebookMonitor</servlet-class>
+	    <servlet-class>org.jcommon.com.facebook.Callback</servlet-class>
 	    <load-on-startup>0</load-on-startup>
 	</servlet>
 	<servlet-mapping>

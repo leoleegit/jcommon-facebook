@@ -5,6 +5,7 @@ import javax.management.MBeanOperationInfo;
 import javax.management.MBeanParameterInfo;
 import org.apache.log4j.Logger;
 import org.jcommon.com.facebook.FacebookManager;
+import org.jcommon.com.facebook.FacebookSession;
 import org.jcommon.com.facebook.PageListener;
 import org.jcommon.com.facebook.RequestCallback;
 import org.jcommon.com.facebook.RequestFactory;
@@ -14,9 +15,6 @@ import org.jcommon.com.facebook.data.Comment;
 import org.jcommon.com.facebook.data.Error;
 import org.jcommon.com.facebook.data.Feed;
 import org.jcommon.com.facebook.data.Message;
-import org.jcommon.com.facebook.seesion.Session;
-import org.jcommon.com.facebook.seesion.FacebookSession;
-import org.jcommon.com.facebook.utils.FacebookType;
 import org.jcommon.com.util.Json2Object;
 import org.jcommon.com.util.http.HttpListener;
 import org.jcommon.com.util.http.HttpRequest;
@@ -79,7 +77,7 @@ public class PageSessionTest extends Monitor
   }
   
   public void deletePostOrComment(String id){
-	  List<Session> sessions = SessionCache.instance().getPageSession();
+	  List<FacebookSession> sessions = SessionCache.instance().getPageSession();
 	  if(sessions.size()==0){
 		  logger.warn("can't find page session");
 		  return;
@@ -94,7 +92,7 @@ public class PageSessionTest extends Monitor
   }
 
   public void removeSession(String session_id){
-	  Session session = SessionCache.instance().removeSession(session_id);
+	  FacebookSession session = SessionCache.instance().removeSession(session_id);
 	    if (session != null) {
 	      session.logout();
 	  }
@@ -132,9 +130,9 @@ public class PageSessionTest extends Monitor
 
   public void shutdown()
   {
-    List<Session> list = SessionCache.instance().getPageSession();
+    List<FacebookSession> list = SessionCache.instance().getPageSession();
     if (list == null) return;
-    for (Session session : list)
+    for (FacebookSession session : list)
       session.logout();
   }
 
@@ -146,7 +144,7 @@ public class PageSessionTest extends Monitor
     this.logger.info(Json2Object.object2Json(post));
     if (this.disable_auto) return;
     String page_id = post_id.substring(0, post_id.indexOf("_"));
-    Session session = SessionCache.instance().getSession(page_id);
+    FacebookSession session = SessionCache.instance().getSession(page_id);
     if (session != null) {
       if (!"auto new post".equals(post.getMessage()));
       ((FacebookSession)session).postFeed2Wall(this, "auto new post", null, null, null, null, null);
@@ -164,7 +162,7 @@ public class PageSessionTest extends Monitor
     this.logger.info(comments.getId());
     if (this.disable_auto) return;
     String page_id = post_id.substring(0, post_id.indexOf("_"));
-    Session session = SessionCache.instance().getSession(page_id);
+    FacebookSession session = SessionCache.instance().getSession(page_id);
 
     if (session != null) {
       if (!"auto replay comment".equals(comments.getMessage()));
@@ -180,7 +178,7 @@ public class PageSessionTest extends Monitor
     this.logger.info(messages.getId());
     if (this.disable_auto) return;
     if (SessionCache.instance().getPageSession().size() > 0) {
-      Session session = (Session)SessionCache.instance().getPageSession().get(0);
+    	FacebookSession session = (FacebookSession)SessionCache.instance().getPageSession().get(0);
       if (!"auto replay message".equals(messages.getMessage())) {
         HttpRequest request = ((FacebookSession)session).replayMessage(this, messages.getId(), "auto replay message");
         this.logger.info(request.getUrl());

@@ -13,12 +13,15 @@ public class UtilsTest {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		Number n = Float.parseFloat("1.405058792624E9");
-		System.out.println(n.longValue());
-		Date d = new Date(n.longValue()*1000l);
-		DateFormat ft= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		String dt = ft.format(d);
-		System.out.println(dt);
+		StringBuilder resp_str = new StringBuilder("fasd,");
+		resp_str.deleteCharAt(resp_str.length()-1);
+		System.out.println(resp_str);
+//		Number n = Float.parseFloat("1.405058792624E9");
+//		System.out.println(n.longValue());
+//		Date d = new Date(n.longValue()*1000l);
+//		DateFormat ft= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//		String dt = ft.format(d);
+//		System.out.println(dt);
 		//System.out.println(getMessage_id("https://graph.facebook.com/v2.0/t_id.312177318835636/messages?date_format=U"));
 	}
 
