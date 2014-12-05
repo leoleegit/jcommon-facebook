@@ -41,8 +41,8 @@ public class AppCache extends MapStore
   public App getAppByID(String api_id) {
 	  if(api_id==null)return null;
 	  Collection<Object> apps = super.getAll().values();
-	  while(!apps.isEmpty()){
-		  App app =  (App) apps.iterator().next();
+	  for(Object o : apps){
+		  App app =  (App) o;
 		  if(api_id.equals(app.getApi_id()))
 			  return app;
 	  }
@@ -63,8 +63,9 @@ public class AppCache extends MapStore
   public Collection<App> getApps() {
 	Collection<App> apps_ = new ArrayList<App>();
 	Collection<Object> apps = super.getAll().values();
-	while(!apps.isEmpty())
-		 apps_.add((App) apps.iterator().next()) ;
+	for(Object app : apps)
+		apps_.add((App) app) ;
+		 
 	return apps_;
   }
 }
