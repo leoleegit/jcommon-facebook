@@ -4,12 +4,13 @@
 
   <groupId>jcommon</groupId>
   <artifactId>jcommon-facebook</artifactId>
-  <version>1.0-v20141105</version>
-  <packaging>war</packaging>
+  <version>1.0-v20141205</version>
+  <packaging>jar</packaging>
+  
   <name>jcommon-facebook Maven Sipapp</name>
   <build>
-   <!--  <finalName>jcommon-facebook-${version}</finalName>-->
-    <finalName>jcommon-facebook</finalName>
+    <finalName>jcommon-facebook-${version}</finalName>
+    <!--  <finalName>jcommon-facebook</finalName>-->
     <plugins>  
 	  <!--   <plugin>
         <groupId>org.mortbay.jetty</groupId>

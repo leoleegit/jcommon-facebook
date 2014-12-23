@@ -65,6 +65,16 @@ public class FacebookManager extends Monitor implements  MapStoreListener, HttpL
         return session;
     }
     
+    public FacebookSession addPmSession(PageListener listener, String user_id, String access_token){
+    	FacebookSession session = SessionCache.instance().removeSession(user_id);
+        if (session != null) {
+          session.logout();
+        }
+        session = new FacebookSession(user_id, access_token, listener);
+        session.login(FacebookType.message);
+        return session;
+    }
+    
     public FacebookSession getFacebookSession(String id){
     	return SessionCache.instance().getSession(id);
     } 

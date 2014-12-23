@@ -43,7 +43,7 @@ public class GetAccessToken extends ResourceServlet
 {
   private static final long serialVersionUID = 1L;
   private static Logger logger = Logger.getLogger(GetAccessToken.class);
-  public static URL init_file_is = GetAccessToken.class.getResource("/facebook-log4j.xml");
+  public static URL init_file_is = null;//GetAccessToken.class.getResource("/facebook-log4j.xml");
 
   public void init(ServletConfig config)
     throws ServletException
