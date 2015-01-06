@@ -15,15 +15,18 @@ package org.jcommon.com.facebook.servlet;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.log4j.Logger;
 import org.jcommon.com.facebook.RequestFactory;
 import org.jcommon.com.facebook.cache.AppCache;
-import org.jcommon.com.facebook.data.*;
+import org.jcommon.com.facebook.data.AccessToken;
+import org.jcommon.com.facebook.data.App;
 import org.jcommon.com.facebook.data.Error;
 import org.jcommon.com.util.JsonUtils;
 import org.jcommon.com.util.http.HttpRequest;
@@ -164,7 +167,8 @@ public class JcommonFacebook extends HttpServlet
             AccessToken access_token_app = new AccessToken(access_token_data);
             logger.info(access_token_app.getId() + ":" + access_token_app.getAccess_token());
             if (((id != null) && (id.equals(access_token_app.getId()))) || ((name != null) && (id.equals(access_token_app.getName())))) {
-              response.getWriter().println(access_token_app.getJsonData());
+							response.getWriter().println(
+									access_token_app.getJson());
               return;
             }
           }
@@ -200,6 +204,6 @@ public class JcommonFacebook extends HttpServlet
     	 error.setType("jcommonfacebook");
     	 error.setMessage(msg);
     } 
-    response.getWriter().println(error.toJsonStr());
+		response.getWriter().println(error.toJson());
   }
 }

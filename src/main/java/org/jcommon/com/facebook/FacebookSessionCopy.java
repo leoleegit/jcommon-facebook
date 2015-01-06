@@ -23,26 +23,27 @@ public class FacebookSessionCopy extends FacebookSession implements PageListener
 	@Override
 	public void onPosts(Feed paramFeed) throws Exception {
 		// TODO Auto-generated method stub
-		logger.info(paramFeed.getJsonData());
+		logger.info(paramFeed.getJson());
 		Proxy proxy = new Proxy(facebook_id,paramFeed,null,null);
-		callback(proxy.toJsonStr());
+		callback(proxy.toJson());
 	}
 
 	@Override
 	public void onComments(Feed paramFeed, Comment paramComment)
 			throws Exception {
 		// TODO Auto-generated method stub
-		logger.info("Feed:"+paramFeed.getJsonData() +"\nComment:"+paramComment.getJsonData());
+		logger.info("Feed:" + paramFeed.getJson() + "\nComment:"
+				+ paramComment.getJson());
 		Proxy proxy = new Proxy(facebook_id,paramFeed,paramComment,null);
-		callback(proxy.toJsonStr());
+		callback(proxy.toJson());
 	}
 
 	@Override
 	public void onMessages(Message paramMessage) throws Exception {
 		// TODO Auto-generated method stub
-		logger.info(paramMessage.getJsonData());
+		logger.info(paramMessage.getJson());
 		Proxy proxy = new Proxy(facebook_id,null,null,paramMessage);
-		callback(proxy.toJsonStr());
+		callback(proxy.toJson());
 	}
 	
 	private void callback(String xml){

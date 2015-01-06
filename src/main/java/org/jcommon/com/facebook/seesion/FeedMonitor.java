@@ -28,6 +28,8 @@ import org.jcommon.com.facebook.utils.FacebookUtils;
 import org.jcommon.com.facebook.utils.FixMap;
 import org.jcommon.com.facebook.utils.TempFileCache;
 import org.jcommon.com.util.JsonUtils;
+import org.jcommon.com.util.health.Status;
+import org.jcommon.com.util.health.StatusManager;
 import org.jcommon.com.util.http.HttpRequest;
 import org.jcommon.com.util.thread.ThreadManager;
 import org.json.JSONArray;
@@ -51,6 +53,9 @@ public class FeedMonitor extends RequestCallback
   private Timer timer_fql   = null;
   private static String prefix = "jcomconfacebook";
   private static final String suffix = ".feed";
+  
+  final String name    = "FBAPI"; 
+  private Status status= new Status(name);
 
   public FeedMonitor(String page_id, String access_token)
   {
@@ -77,15 +82,22 @@ public class FeedMonitor extends RequestCallback
     	    ThreadManager.instance().execute(re);
     	}
     }, 5000L, 10000L);
-    timer_fql   =  org.jcommon.com.util.thread.TimerTaskManger.instance().schedule("FeedMonitor-Fql", new TimerTask(){
-    	public void run(){
-    		if(!run)return;
-    	      
-    	    HttpRequest re = RequestFactory.createGetFeedUpdateReqeustByFql(FeedMonitor.this, FeedMonitor.this.page_id, FeedMonitor.this.access_token, monitor_lenght);
-    	    FeedMonitor.this.addOne(re, "monitorCallback");
-    	    ThreadManager.instance().execute(re);
-    	}
-    }, 20000L, 180000L);
+
+    /**
+     * Version 2.0 of the Facebook Platform API is the last version where FQL will be available. 
+     * Versions after 2.0 will not support FQL. 
+     * Please migrate your applications to use Graph API instead of FQL. 
+     * Please see our changelog for current version information.
+     * */
+//    timer_fql   =  org.jcommon.com.util.thread.TimerTaskManger.instance().schedule("FeedMonitor-Fql", new TimerTask(){
+//    	public void run(){
+//    		if(!run)return;
+//    	      
+//    	    HttpRequest re = RequestFactory.createGetFeedUpdateReqeustByFql(FeedMonitor.this, FeedMonitor.this.page_id, FeedMonitor.this.access_token, monitor_lenght);
+//    	    FeedMonitor.this.addOne(re, "monitorCallback");
+//    	    ThreadManager.instance().execute(re);
+//    	}
+//    }, 20000L, 180000L);
     this.logger.info(this.page_id + "running ...");
   }
 
@@ -329,11 +341,13 @@ public void postCallback(JSONObject jsonO) {
   public void onFailure(HttpRequest reqeust, StringBuilder sResult)
   {
     super.onFailure(reqeust, sResult);
+    setStatus(sResult.toString());
     logger.warn(sResult.toString());
   }
 
   public void onSuccessful(HttpRequest reqeust, StringBuilder sResult)
   {
+	setStatus("OK");  
     String str = sResult.toString();
     String method = null;
     JSONObject jsonO = null;
@@ -371,5 +385,20 @@ public void postCallback(JSONObject jsonO) {
     catch (Throwable t) {
       this.logger.error("", t);
     }
+  }
+  
+  public void onTimeout(HttpRequest reqeust){
+    super.onTimeout(reqeust);
+    setStatus("Timeout");
+  }
+
+  public void onException(HttpRequest reqeust, Exception e){
+    super.onException(reqeust, e);
+    setStatus(e.getMessage());
+  }
+  
+  public void setStatus(String status){
+	this.status.setStatus(status);
+	StatusManager.instance().addStatus(this.status);
   }
 }

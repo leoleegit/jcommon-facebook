@@ -1,26 +1,17 @@
 package org.jcommon.com.facebook.test;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
 import org.apache.log4j.Logger;
-import org.jcommon.com.facebook.FacebookSession;
 import org.jcommon.com.facebook.PageListener;
 import org.jcommon.com.facebook.RequestCallback;
-import org.jcommon.com.facebook.RequestFactory;
-import org.jcommon.com.facebook.cache.SessionCache;
 import org.jcommon.com.facebook.data.Comment;
 import org.jcommon.com.facebook.data.Error;
 import org.jcommon.com.facebook.data.Feed;
 import org.jcommon.com.facebook.data.Message;
-import org.jcommon.com.facebook.seesion.FeedMonitor;
 import org.jcommon.com.facebook.servlet.GetAccessToken;
-import org.jcommon.com.facebook.utils.FacebookUtils;
-import org.jcommon.com.util.http.FileRequest;
 import org.jcommon.com.util.http.HttpListener;
 import org.jcommon.com.util.http.HttpRequest;
-import org.jcommon.com.util.thread.ThreadManager;
 import org.json.JSONException;
 
 public class FacebookUtilsTest extends GetAccessToken implements PageListener, RequestCallback, HttpListener{
@@ -88,7 +79,7 @@ public class FacebookUtilsTest extends GetAccessToken implements PageListener, R
 	@Override
 	public void requestFailure(HttpRequest paramHttpRequest, Error paramError) {
 		// TODO Auto-generated method stub
-		logger.info(paramError.getJsonData());
+		logger.info(paramError.getJson());
 	}
 
 	@Override

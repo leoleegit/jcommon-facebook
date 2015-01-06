@@ -24,6 +24,7 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.jcommon.com.facebook.RequestFactory;
@@ -98,7 +99,7 @@ public class GetAccessToken extends ResourceServlet
       error.setType("get_access_token");
       if (app == null) {
         error.setMessage("can find facebook app : " + app_name);
-        response.getWriter().println(error.toJsonStr());
+				response.getWriter().println(error.toJson());
         return;
       }
 
@@ -120,7 +121,7 @@ public class GetAccessToken extends ResourceServlet
         	access_token_ = access_token_.replaceAll("access_token=", "");
         } else {
           error.setMessage("get access_token error:" + access_token_);
-          response.getWriter().println(error.toJsonStr());
+					response.getWriter().println(error.toJson());
           return;
         }
         logger.info("access_token_:"+access_token_);
@@ -140,8 +141,8 @@ public class GetAccessToken extends ResourceServlet
              BaseUser user    = new BaseUser(facebook_request.getResult());
              at.setId(user.getId());
              at.setName(user.getName());
-             logger.info(at.toJsonStr());
-             response.getWriter().println(at.toJsonStr());
+					logger.info(at.toJson());
+					response.getWriter().println(at.toJson());
              return;
         }
         facebook_request = RequestFactory.createGetAllAccessTokenReqeust(null, at.getAccess_token());
@@ -150,14 +151,14 @@ public class GetAccessToken extends ResourceServlet
         JSONObject jsonO = JsonUtils.getJSONObject(data);
         if (jsonO == null) {
           error.setMessage("get access_token error:" + data);
-          response.getWriter().println(error.toJsonStr());
+					response.getWriter().println(error.toJson());
           return;
         }
         try {
           JSONArray arr = jsonO.has("data") ? jsonO.getJSONArray("data") : null;
           if (arr == null) {
             error.setMessage("get access_token error:" + data);
-            response.getWriter().println(error.toJsonStr());
+						response.getWriter().println(error.toJson());
             return;
           }
 
@@ -180,7 +181,7 @@ public class GetAccessToken extends ResourceServlet
           if(resp.size()>1){
         	  resp_str.append("[");
         	  for(AccessToken at_ : resp){
-        		  resp_str.append(at_.getJsonData()).append(",");
+							resp_str.append(at_.getJson()).append(",");
         	  }
         	  resp_str.deleteCharAt(resp_str.length()-1);
         	  resp_str.append("]");
@@ -188,7 +189,7 @@ public class GetAccessToken extends ResourceServlet
         	  return;
           }else if(resp.size()>0){
         	  for(AccessToken at_ : resp){
-        		  resp_str.append(at_.getJsonData());
+							resp_str.append(at_.getJson());
         	  }
         	  response.getWriter().println(resp_str);
         	  return;
@@ -197,16 +198,16 @@ public class GetAccessToken extends ResourceServlet
           
           if (id!=null) {
             error.setMessage("get access_token error: can't find map access_token for " + id);
-            response.getWriter().println(error.toJsonStr());
+						response.getWriter().println(error.toJson());
           } else if (all!=null) {
               error.setMessage("get access_token error: can't find any access_token");
-              response.getWriter().println(error.toJsonStr());
+						response.getWriter().println(error.toJson());
           }
         }
         catch (JSONException e) {
           logger.error("", e);
           error.setMessage("get access_token error:" + e.getMessage());
-          response.getWriter().println(error.toJsonStr());
+					response.getWriter().println(error.toJson());
         }
       }
     }

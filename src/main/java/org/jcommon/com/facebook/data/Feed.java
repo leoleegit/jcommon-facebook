@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.jcommon.com.util.Json2Object;
 import org.jcommon.com.util.JsonObject;
 import org.jcommon.com.util.JsonUtils;
 import org.json.JSONException;
@@ -51,22 +50,22 @@ public class Feed extends JsonObject
           String to = jsonO.getString("to");
           List<Object> list = null;
           if ((to != null) && (to.startsWith("["))) {
-            list = Json2Object.json2Objects(BaseUser.class, jsonO.getString("to"));
+            list = json2Objects(BaseUser.class, jsonO.getString("to"));
           } else if ((to != null) && (to.startsWith("{"))) {
             JSONObject o = JsonUtils.getJSONObject(to);
             if (o.has("data")) {
-              list = Json2Object.json2Objects(BaseUser.class, o.getString("data"));
+              list = json2Objects(BaseUser.class, o.getString("data"));
             }
           }
           resetTo(list);
         }
         if (jsonO.has("actions")) {
-          List<Object> list = Json2Object.json2Objects(Link.class, jsonO.getString("actions"));
+          List<Object> list = json2Objects(Link.class, jsonO.getString("actions"));
           resetLink(list);
         }
       }
       catch (JSONException e) {
-        Json2Object.logger.error("", e);
+        logger.error("", e);
       }
   }
 

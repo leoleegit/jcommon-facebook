@@ -8,7 +8,7 @@ public class PermissionUtilsTest
 {
   public static void main(String[] args)
   {
-    Permission[] ps = { UserPermission.email, UserPermission.publish_actions };
+    Permission[] ps = { UserPermission.user_actions_music, UserPermission.user_photos};
     System.out.println(PermissionUtils.permissions2Str(ps));
   }
 }

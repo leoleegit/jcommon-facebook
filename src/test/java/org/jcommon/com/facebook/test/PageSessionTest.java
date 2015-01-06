@@ -1,8 +1,10 @@
 package org.jcommon.com.facebook.test;
 
 import java.util.List;
+
 import javax.management.MBeanOperationInfo;
 import javax.management.MBeanParameterInfo;
+
 import org.apache.log4j.Logger;
 import org.jcommon.com.facebook.FacebookManager;
 import org.jcommon.com.facebook.FacebookSession;
@@ -15,7 +17,6 @@ import org.jcommon.com.facebook.data.Comment;
 import org.jcommon.com.facebook.data.Error;
 import org.jcommon.com.facebook.data.Feed;
 import org.jcommon.com.facebook.data.Message;
-import org.jcommon.com.util.Json2Object;
 import org.jcommon.com.util.http.HttpListener;
 import org.jcommon.com.util.http.HttpRequest;
 import org.jcommon.com.util.jmx.Monitor;
@@ -140,8 +141,8 @@ public class PageSessionTest extends Monitor
     throws Exception
   {
     String post_id = post.getId();
-    this.logger.info(post.getJsonData());
-    this.logger.info(Json2Object.object2Json(post));
+		this.logger.info(post.getJson());
+		this.logger.info(post.toJson());
     if (this.disable_auto) return;
     String page_id = post_id.substring(0, post_id.indexOf("_"));
     FacebookSession session = SessionCache.instance().getSession(page_id);
@@ -156,7 +157,7 @@ public class PageSessionTest extends Monitor
   public void onComments(Feed post, Comment comments) throws Exception
   {
     String post_id = post.getId();
-    this.logger.info("post:" + post.getJsonData());
+		this.logger.info("post:" + post.getJson());
     this.logger.info("comment:" + comments.getMessage());
     this.logger.info(post.getId());
     this.logger.info(comments.getId());
@@ -174,7 +175,7 @@ public class PageSessionTest extends Monitor
 
   public void onMessages(Message messages) throws Exception
   {
-    this.logger.info(messages.getJsonData());
+		this.logger.info(messages.getJson());
     this.logger.info(messages.getId());
     if (this.disable_auto) return;
     if (SessionCache.instance().getPageSession().size() > 0) {
@@ -193,7 +194,7 @@ public class PageSessionTest extends Monitor
 
   public void requestFailure(HttpRequest request, Error error)
   {
-    this.logger.info(Json2Object.object2Json(error));
+		this.logger.info(error.getJson());
   }
 
 	@Override

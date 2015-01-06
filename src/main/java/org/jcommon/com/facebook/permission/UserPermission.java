@@ -17,15 +17,15 @@ public enum UserPermission
 {
 	user_about_me,
 	
-	user_actions.books,
+	user_actions_books("user_actions.books"),
 	
-	user_actions.fitness,
+	user_actions_fitness("user_actions.fitness"),
 	
-	user_actions.music,
+	user_actions_music("user_actions.music"),
 	
-	user_actions.news,
+	user_actions_news("user_actions.news"),
 	
-	user_actions.video,
+	user_actions_video("user_actions.video"),
 	
 	user_activities,
 	
@@ -66,6 +66,21 @@ public enum UserPermission
 	user_website,
 	
 	user_work_history;
+	
+	private String str;
+	
+	UserPermission(String str){
+		this.str = str;
+	}
+	
+	UserPermission(){
+	}
+	
+	public String toString(){
+		if(str!=null)
+			return str;
+		return super.toString();
+	}
 //  email, 
 //
 //  publish_actions, 

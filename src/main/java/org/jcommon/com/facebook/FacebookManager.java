@@ -351,7 +351,7 @@ public class FacebookManager extends Monitor implements  MapStoreListener, HttpL
 
 	public void onProxy(Proxy paramProxy) throws Exception {
 		// TODO Auto-generated method stub
-		logger.info(paramProxy.getJsonData());
+		logger.info(paramProxy.getJson());
 		String id = paramProxy.getId();
 		int type  = paramProxy.getType();
 		if(type==0){

@@ -139,6 +139,6 @@ public class Uploader extends HttpServlet
     Error error = new Error();
     error.setType("jcommonfacebook.uploader");
     error.setMessage(msg);
-    response.getWriter().println(error.toJsonStr());
+		response.getWriter().println(error.toJson());
   }
 }

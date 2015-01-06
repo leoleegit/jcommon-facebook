@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.jcommon.com.util.Json2Object;
 import org.jcommon.com.util.JsonObject;
 import org.jcommon.com.util.JsonUtils;
 import org.json.JSONException;
@@ -33,12 +32,13 @@ public class Picture extends JsonObject
     if (jsonO != null)
       try {
         if (jsonO.has("data")) {
-          List<Object> list = Json2Object.json2Objects(Picture.Data.class, jsonO.getString("data"));
+					List<Object> list = json2Objects(Picture.Data.class,
+							jsonO.getString("data"));
           resetData(list);
         }
       }
       catch (JSONException e) {
-        Json2Object.logger.error("", e);
+				logger.error("", e);
       }
   }
 

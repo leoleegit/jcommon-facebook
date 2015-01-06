@@ -15,6 +15,7 @@ package org.jcommon.com.facebook;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.log4j.Logger;
 import org.jcommon.com.facebook.cache.CallbackCache;
 import org.jcommon.com.facebook.cache.DataCache;
@@ -133,7 +134,7 @@ public class FacebookSession
         if (error.getMessage() == null)
           error.setMessage("reqeust fail request can't find wall album id");
         callback.requestFailure(null, error);
-        this.logger.warn(error.toJsonStr());
+				this.logger.warn(error.toJson());
         return null;
       }
     }
