@@ -1,7 +1,7 @@
 jcommon-facebook
 ================
 
-# 1. FacebookSession 
+ ### 1. class FacebookSession 
 * postPhoto2Wall(RequestCallback callback, File file, String message, boolean start_upload) ;
 * postVideo2Wall(RequestCallback callback, File file, String title, String description, boolean start_upload) ;
 * postFeed2Wall(RequestCallback callback, String message, String link, String picture, String name, String caption, String description);
@@ -14,4 +14,7 @@ jcommon-facebook
 * deleteComment4Wall(RequestCallback callback, String comment_id);
 * replayMessage(RequestCallback callback, String message_id, String message) ;
 
-2.
+### 2. interface PageListener
+*  onPosts(Feed paramFeed)
+*  onComments(Feed paramFeed, Comment paramComment)
+*  onMessages(Message paramMessage)
