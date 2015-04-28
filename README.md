@@ -1,7 +1,7 @@
 jcommon-facebook
 ================
 
- ### 1. class FacebookSession 
+### 1. class FacebookSession 
 * postPhoto2Wall(RequestCallback callback, File file, String message, boolean start_upload) ;
 * postVideo2Wall(RequestCallback callback, File file, String title, String description, boolean start_upload) ;
 * postFeed2Wall(RequestCallback callback, String message, String link, String picture, String name, String caption, String description);
