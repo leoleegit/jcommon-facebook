@@ -13,3 +13,5 @@ jcommon-facebook
  .deletePost4Wall(RequestCallback callback, String post_id);
  .deleteComment4Wall(RequestCallback callback, String comment_id);
  .replayMessage(RequestCallback callback, String message_id, String message) ;
+
+2.
