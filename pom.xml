@@ -4,12 +4,11 @@
 
   <groupId>jcommon</groupId>
   <artifactId>jcommon-facebook</artifactId>
-  <version>1.0-v20141215</version>
-  <packaging>jar</packaging>
-  
+  <version>1.0-v20150917</version>
   <name>jcommon-facebook Maven Sipapp</name>
   <build>
-    <finalName>jcommon-facebook-${version}</finalName>
+    <finalName>jcommon-facebook</finalName>
+    <!--  <finalName>jcommon-facebook-${version}</finalName>-->
     <!--  <finalName>jcommon-facebook</finalName>-->
     <plugins>  
 	  <!--   <plugin>
@@ -63,7 +62,7 @@
     <dependency>
       <groupId>jcommon</groupId>
        <artifactId>jcommon-jutils</artifactId>
-       <version>1.0-v20141225</version>
+       <version>1.0-v20150917</version>
     </dependency>
     <dependency>
       <groupId>log4j</groupId>
