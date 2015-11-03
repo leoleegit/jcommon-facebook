@@ -22,6 +22,7 @@ import java.util.TimerTask;
 
 import org.apache.log4j.Logger;
 import org.jcommon.com.facebook.RequestFactory;
+import org.jcommon.com.facebook.config.FacebookConfig;
 import org.jcommon.com.facebook.utils.FixMap;
 import org.jcommon.com.facebook.utils.TempFileCache;
 import org.jcommon.com.util.JsonUtils;
@@ -48,8 +49,10 @@ public class MessageMonitor extends RequestCallback
 
   private static String prefix = "jcomconfacebook";
   private static final String suffix = ".pm";
+	private FacebookConfig config;
 
-  public MessageMonitor(String page_id, String access_token)
+	public MessageMonitor(String page_id, String access_token,
+			FacebookConfig config)
   {
     this.page_id = page_id;
     this.access_token = access_token;
@@ -59,7 +62,10 @@ public class MessageMonitor extends RequestCallback
   public void startup() {
     this.run = true;
     this.task = new MessageMonitor.Task();
-    TempFileCache.loadFacebookFixCache(this.message_list, prefix, suffix);
+		if (config != null && config.isFacebook_cache()) {
+			TempFileCache.loadFacebookFixCache(this.message_list, prefix,
+					suffix);
+		}
     this.timer.schedule(this.task, 5000L, 20000L);
     this.logger.info(this.page_id + "running ...");
   }
@@ -70,7 +76,10 @@ public class MessageMonitor extends RequestCallback
   }
   
   public void shutdown() {
-    TempFileCache.saveFacebookFixCache(this.message_list, prefix, suffix);
+		if (config != null && config.isFacebook_cache()) {
+			TempFileCache.saveFacebookFixCache(this.message_list, prefix,
+					suffix);
+		}
     if (this.timer != null) {
       try {
         this.run = false;

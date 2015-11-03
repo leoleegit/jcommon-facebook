@@ -15,17 +15,20 @@ package org.jcommon.com.facebook;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.jcommon.com.facebook.cache.CallbackCache;
 import org.jcommon.com.facebook.cache.DataCache;
 import org.jcommon.com.facebook.cache.SessionCache;
+import org.jcommon.com.facebook.config.FacebookConfig;
 import org.jcommon.com.facebook.data.Album;
 import org.jcommon.com.facebook.data.BaseUser;
 import org.jcommon.com.facebook.data.Comment;
 import org.jcommon.com.facebook.data.Error;
 import org.jcommon.com.facebook.data.Feed;
 import org.jcommon.com.facebook.data.Message;
+import org.jcommon.com.facebook.filter.Filter;
 import org.jcommon.com.facebook.seesion.FeedMonitor;
 import org.jcommon.com.facebook.seesion.MessageMonitor;
 import org.jcommon.com.facebook.seesion.PageCallback;
@@ -43,37 +46,51 @@ import org.json.JSONObject;
 public class FacebookSession
   implements PageCallback, HttpListener
 {
-  protected Logger logger = Logger.getLogger(getClass());
-  public static boolean debug;
-  protected String facebook_id;
-  private String access_token;
-  private FacebookType type;
-  private MessageMonitor message_monitor;
-  private FeedMonitor feed_monitor;
-  private List<PageListener> listeners = new ArrayList<PageListener>();
-  private String wall_album_id;
+	protected Logger logger = Logger.getLogger(getClass());
+	public static boolean debug;
+	protected String facebook_id;
+	private String access_token;
+	private FacebookType type;
+	private MessageMonitor message_monitor;
+	private FeedMonitor feed_monitor;
+	private List<PageListener> listeners = new ArrayList<PageListener>();
+	private List<Filter> filters = new ArrayList<Filter>();
+	private String wall_album_id;
 
-  private BaseUser me;
-  private boolean monitoring;
+	private BaseUser me;
+	private boolean monitoring;
+	private FacebookConfig config;
+	private Properties properties = new Properties();
 
-  public FacebookSession(String facebook_id, String access_token, PageListener listnener){
-    this.facebook_id = facebook_id;
-    this.access_token = access_token;
-    addListnener(listnener);
-  }
+	public FacebookSession(String facebook_id, String access_token,
+			PageListener listnener) {
+		this.facebook_id = facebook_id;
+		this.access_token = access_token;
+		addListnener(listnener);
+	}
 
-  public void login(FacebookType type) {
-	  setType(type);
-	  startMonitor();
-      SessionCache.instance().addSession(this.facebook_id, this);
-  }
+	public void login(FacebookType type) {
+		setType(type);
+		startMonitor();
+		SessionCache.instance().addSession(this.facebook_id, this);
+	}
 
-  public void logout() {
-	  stopMonitor();
-      SessionCache.instance().removeSession(this.facebook_id);
-  }
+	public void logout() {
+		stopMonitor();
+		SessionCache.instance().removeSession(this.facebook_id);
+	}
+
+	public void addFilter(Filter filter) {
+		if (!filters.contains(filter))
+			filters.add(filter);
+	}
+
+	public void removeFilter(Filter filter) {
+		if (filters.contains(filter))
+			filters.remove(filter);
+	}
   
-  public void stopMonitor(){
+	public void stopMonitor() {
 	  if(FacebookType.page == type && monitoring){  
 		    this.message_monitor.shutdown();
 		    this.feed_monitor.shutdown();
@@ -87,19 +104,22 @@ public class FacebookSession
 		    this.message_monitor = null;
 	  }
 	  monitoring = false;
-  }
+	}
   
   public void startMonitor(){
 	  if(FacebookType.page == type && !monitoring){
-		   this.message_monitor = new MessageMonitor(this.facebook_id, this.access_token);
-		   this.feed_monitor = new FeedMonitor(this.facebook_id, this.access_token);
+			this.message_monitor = new MessageMonitor(this.facebook_id,
+					this.access_token, getConfig());
+			this.feed_monitor = new FeedMonitor(this.facebook_id,
+					this.access_token, getConfig());
 		   this.message_monitor.startup();
 		   this.feed_monitor.startup(); 
 		   this.message_monitor.setListener(this);
 		   this.feed_monitor.setListener(this);
 		   monitoring = true;
 	  }else  if(FacebookType.message == type && !monitoring){
-		   this.message_monitor = new MessageMonitor(this.facebook_id, this.access_token);
+			this.message_monitor = new MessageMonitor(this.facebook_id,
+					this.access_token, getConfig());
 		   this.message_monitor.startup();
 		   this.message_monitor.setListener(this);
 		   monitoring = true;
@@ -254,13 +274,21 @@ public class FacebookSession
   {
     try
     {
+			logger.info("filters size:" + filters.size());
       if (this.listeners.size() != 0) {
         Feed feed = new Feed(posts.toString());
         if ((feed.getPicture() != null) && (feed.getSource() == null)) {
           feed.setSource(FacebookUtils.getNormalSource(feed.getPicture()));
         }
-        for(PageListener listener : listeners)
-        	listener.onPosts(feed);
+				boolean pass = true;
+				for (Filter filter : filters) {
+					pass = filter.filter(feed);
+				}
+				if (!pass)
+					return;
+				for (PageListener listener : listeners) {
+					listener.onPosts(feed);
+				}
       }else{
     	  logger.warn("listener is null");
       }
@@ -277,10 +305,18 @@ public class FacebookSession
     }
     try
     {
+			logger.info("filters size:" + filters.size());
       Feed feed = new Feed(post.toString());
       for (JSONObject jsonO : comments){
+				Comment comment = new Comment(jsonO.toString());
+				boolean pass = true;
+				for (Filter filter : filters) {
+					pass = filter.filter(comment);
+				}
+				if (!pass)
+					return;
     	  for(PageListener listener : listeners)
-    		  listener.onComments(feed, new Comment(jsonO.toString()));
+					listener.onComments(feed, comment);
       }
     }
     catch (Exception e)
@@ -303,9 +339,19 @@ public class FacebookSession
     }
     try
     {
-      for (JSONObject jsonO : messages)
-    	  for(PageListener listener : listeners)
-    		  listener.onMessages(new Message(jsonO.toString()));
+			logger.info("filters size:" + filters.size());
+			for (JSONObject jsonO : messages) {
+				Message message = new Message(jsonO.toString());
+				boolean pass = true;
+				for (Filter filter : filters) {
+					pass = filter.filter(message);
+				}
+				if (!pass)
+					return;
+				for (PageListener listener : listeners)
+					listener.onMessages(message);
+			}
+
     }
     catch (Exception e) {
       this.logger.error("", e);
@@ -472,5 +518,33 @@ public class FacebookSession
 				onComment(json_post, json_comment);
 			}
 		}
+	}
+
+	public void setProperties(Properties properties) {
+		this.properties = properties;
+	}
+
+	public Properties getProperties() {
+		return properties;
+	}
+
+	public void setProperty(String key, String value) {
+		this.properties.put(key, value);
+	}
+
+	public String getProperty(String key) {
+		if (this.properties.containsKey(key))
+			return this.properties.getProperty(key);
+		return null;
+	}
+
+	public void setConfig(FacebookConfig config) {
+		this.config = config;
+	}
+
+	public FacebookConfig getConfig() {
+		if (config == null)
+			config = new FacebookConfig();
+		return config;
 	}
 }

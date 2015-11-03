@@ -234,8 +234,9 @@ public class FacebookManager extends Monitor implements  MapStoreListener, HttpL
 		}
 	}
 	
-	public void addApp(String app_name, String api_id, String app_secret, String permissions){
-	    App app = new App(api_id, app_secret);
+	public void addApp(String app_name, String app_id, String app_secret,
+			String permissions) {
+		App app = new App(app_id, app_secret);
 	    app.setPermissions(permissions);
 	    AppCache.instance().addApp(app_name, app);
 	}

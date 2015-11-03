@@ -24,6 +24,7 @@ import java.util.TimerTask;
 import org.apache.log4j.Logger;
 import org.jcommon.com.facebook.FacebookSession;
 import org.jcommon.com.facebook.RequestFactory;
+import org.jcommon.com.facebook.config.FacebookConfig;
 import org.jcommon.com.facebook.utils.FacebookUtils;
 import org.jcommon.com.facebook.utils.FixMap;
 import org.jcommon.com.facebook.utils.TempFileCache;
@@ -43,7 +44,9 @@ public class FeedMonitor extends RequestCallback
   private String access_token;
   private PageCallback listener;
   private static final int monitor_lenght = 100;
-  private FixMap<String, Long> post_list  = new FixMap<String, Long>(-1);
+	private FixMap<String, Long> post_list = new FixMap<String, Long>(
+			monitor_lenght);
+	// private FixMap<String, Long> post_list = new FixMap<String, Long>(-1);
   private FixMap<String, String> after_list  = new FixMap<String, String>(-1);
   private Map<String, Long> post_cache = new HashMap<String, Long>();
   private Map<HttpRequest, JSONObject> request_cache = new HashMap<HttpRequest, JSONObject>();
@@ -53,11 +56,13 @@ public class FeedMonitor extends RequestCallback
   private Timer timer_fql   = null;
   private static String prefix = "jcomconfacebook";
   private static final String suffix = ".feed";
-  
-  final String name    = "FBAPI"; 
-  private Status status= new Status(name);
 
-  public FeedMonitor(String page_id, String access_token)
+	private FacebookConfig config;
+	public final String name = "FBAPI";
+	private Status status = new Status(name);
+
+	public FeedMonitor(String page_id, String access_token,
+			FacebookConfig config)
   {
     this.page_id = page_id;
     this.access_token = access_token;
@@ -70,8 +75,11 @@ public class FeedMonitor extends RequestCallback
   }
   public void startup() {
     this.run = true;
-    TempFileCache.loadFacebookFixCache(this.post_list, prefix, suffix);
-    TempFileCache.loadFacebookFixCache_(this.after_list, prefix, ".comment");
+		if (config != null && config.isFacebook_cache()) {
+			TempFileCache.loadFacebookFixCache(this.post_list, prefix, suffix);
+			TempFileCache.loadFacebookFixCache_(this.after_list, prefix,
+					".comment");
+		}
     
     timer_graph =  org.jcommon.com.util.thread.TimerTaskManger.instance().schedule("FeedMonitor-Graph", new TimerTask(){
     	public void run(){
@@ -102,8 +110,11 @@ public class FeedMonitor extends RequestCallback
   }
 
   public void shutdown() {
-    TempFileCache.saveFacebookFixCache(this.post_list, prefix, suffix);
-    TempFileCache.saveFacebookFixCache(this.after_list, prefix, ".comment");
+		if (config != null && config.isFacebook_cache()) {
+			TempFileCache.saveFacebookFixCache(this.post_list, prefix, suffix);
+			TempFileCache.saveFacebookFixCache(this.after_list, prefix,
+					".comment");
+		}
     this.run = false;
     if (this.timer_graph != null) {
       try {
@@ -398,7 +409,8 @@ public void postCallback(JSONObject jsonO) {
   }
   
   public void setStatus(String status){
-	this.status.setStatus(status);
-	StatusManager.instance().addStatus(this.status);
+		this.status.setStatus(status);
+		if (StatusManager.instance() != null)
+			StatusManager.instance().addStatus(this.status);
   }
 }

@@ -13,6 +13,7 @@
 package org.jcommon.com.facebook;
 
 import java.io.File;
+
 import org.jcommon.com.facebook.data.App;
 import org.jcommon.com.facebook.utils.FacebookType;
 import org.jcommon.com.util.JsonUtils;
@@ -171,7 +172,7 @@ public class RequestFactory
 
     String url = graph_url + version + "/" + album_id + "/photos";
     url = JsonUtils.toRequestURL(url, keys, values);
-    return new FileRequest(url,HttpRequest.POST,listener,trusted,file);
+		return new FileRequest(url, file, "media", listener);
   }
 
   public static HttpRequest createPostVideoRequest(HttpListener listener, String page_id, File file, String title, String description, String access_token) {
@@ -181,7 +182,7 @@ public class RequestFactory
 
     String url = graph_url + version + "/" + page_id + "/videos";
     url = JsonUtils.toRequestURL(url, keys, values);
-    return new FileRequest(url,HttpRequest.POST,listener,trusted,file);
+		return new FileRequest(url, file, "media", listener);
   }
 
   public static HttpRequest createPostRequest(HttpListener listener, String page_id, String message, String link, String picture, String name, String caption, String description, String access_token)
@@ -235,7 +236,8 @@ public class RequestFactory
     return new HttpRequest(url, listener, trusted);
   }
   
-  public static HttpRequest createSubscriptionReqeust(HttpListener listener, App app, String page_id, String callback_url,FacebookType type){
+	public static HttpRequest createSubscriptionReqeust(HttpListener listener,
+			App app, String page_id, String callback_url, FacebookType type) {
 	String[] keys   = { "access_token","callback_url","object","fields","verify_token","active","method"};
     String[] values = { app.getAccess_token(), callback_url, type.toString(), "feed", app.getVerify_token(), "true",HttpRequest.POST };
     String url = graph_url + version + "/" + page_id + "/subscriptions";

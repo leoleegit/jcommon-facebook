@@ -14,7 +14,7 @@ public class Proxy extends JsonObject{
 	private Message message_;
 	
 	public Proxy(String data){
-		super(data);
+		super(data, true);
 	}
 
 	public Proxy(String id, Feed feed, Comment comment, Message message){

@@ -17,6 +17,9 @@ import org.jcommon.com.facebook.data.Comment;
 import org.jcommon.com.facebook.data.Error;
 import org.jcommon.com.facebook.data.Feed;
 import org.jcommon.com.facebook.data.Message;
+import org.jcommon.com.facebook.permission.ExtendedPermission;
+import org.jcommon.com.facebook.permission.Permission;
+import org.jcommon.com.facebook.utils.PermissionUtils;
 import org.jcommon.com.util.http.HttpListener;
 import org.jcommon.com.util.http.HttpRequest;
 import org.jcommon.com.util.jmx.Monitor;
@@ -32,6 +35,31 @@ public class PageSessionTest extends Monitor
     super("Page Session Tester");
   }
   
+	public void startup() {
+		// String app_name = "facebook";
+		// String app_id = "417835838367226";
+		// String app_secret = "6f4150830a5d14910a72cf629d8c853e";
+
+		String app_name = "SocialMM";
+		String app_id = "186208661474652";
+		String app_secret = "0bddb8fc5c19a89c4d65264161a20031";
+		// read_stream,manage_pages,publish_stream,offline_access,read_mailbox,read_page_mailboxes
+		Permission[] p = { ExtendedPermission.read_stream,
+				ExtendedPermission.manage_pages,
+				ExtendedPermission.publish_actions,
+				ExtendedPermission.read_page_mailboxes,
+				ExtendedPermission.read_mailbox };
+		String permissions = PermissionUtils.permissions2Str(p);
+		FacebookManager.instance().addApp(app_name, app_id, app_secret,
+				permissions);
+
+		String accesstoken = "CAAF8BPy4ZAfoBAAwoCYk4Fb2pLZCcKZBHrl9LfQ7GxnC9dZC4TWZBT6wt5mT2mY26UdIlpZC8WlTNacgqxhsVy7n9AR9xGFKhebfkxv6oIIIkssviZBDCeXQZBjhHydvjZBYayTFHEJuWm1CmlhBq2jMuZAMLr71KsqkxJdgoW5l3GrNb0zrs9nuCU";
+		String pageid = "271039552948235";
+
+		FacebookManager.instance().addPageSession(this, pageid, accesstoken);
+		super.startup();
+	}
+
   //read_stream,manage_pages,publish_stream,offline_access,read_mailbox,read_page_mailboxes
   public void initOperation()
   {
@@ -129,29 +157,32 @@ public class PageSessionTest extends Monitor
 	  ThreadManager.instance().execute(request);
   }
 
-  public void shutdown()
-  {
-    List<FacebookSession> list = SessionCache.instance().getPageSession();
-    if (list == null) return;
-    for (FacebookSession session : list)
-      session.logout();
+	public void shutdown() {
+		// List<FacebookSession> list =
+		// SessionCache.instance().getPageSession();
+		// if (list == null)
+		// return;
+		// for (FacebookSession session : list)
+		// session.logout();
+
+		super.shutdown();
   }
 
-  public void onPosts(Feed post)
-    throws Exception
-  {
-    String post_id = post.getId();
-		this.logger.info(post.getJson());
+	public void onPosts(Feed post) throws Exception {
+		String post_id = post.getId();
 		this.logger.info(post.toJson());
-    if (this.disable_auto) return;
-    String page_id = post_id.substring(0, post_id.indexOf("_"));
-    FacebookSession session = SessionCache.instance().getSession(page_id);
-    if (session != null) {
-      if (!"auto new post".equals(post.getMessage()));
-      ((FacebookSession)session).postFeed2Wall(this, "auto new post", null, null, null, null, null);
-    } else {
-      this.logger.warn("can't find page session :" + post_id);
-    }
+		if (this.disable_auto)
+			return;
+		String page_id = post_id.substring(0, post_id.indexOf("_"));
+		FacebookSession session = SessionCache.instance().getSession(page_id);
+		if (session != null) {
+			if (!"auto new post".equals(post.getMessage()))
+				;
+			((FacebookSession) session).postFeed2Wall(this, "auto new post",
+					null, null, null, null, null);
+		} else {
+			this.logger.warn("can't find page session :" + post_id);
+		}
   }
 
   public void onComments(Feed post, Comment comments) throws Exception
