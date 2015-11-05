@@ -1,0 +1,35 @@
+<html>
+<head>
+</head>
+<body>
+<h1>upload to facebook</h1>
+<h2>VIDEO</h2>
+<form method='POST' enctype='multipart/form-data' action='https://graph-video.facebook.com/271039552948235/videos'>
+<input type="hidden" name="access_token" value="AAACpWxUfDVwBAH41F3uLQLsZBKB4hXOJNpdJXCPZB6MKgDCRbFO5ZAiyqgWJrIOBOLgOt2IKXBudqEM6IXw8NkhYsyY4D5pyYnSRJnMOjdWOZAcNGKK6">
+title about the file: <input type=text name=title value="title"><br>
+description about the file: <input type=text name=description value="description"><br>
+File to upload:         <input type=file name=source><br>
+<br>
+<input type=submit value=Press> to upload the file!
+</form>
+<h2>PHOTO</h2>
+<form method='POST' enctype='multipart/form-data' action='https://graph.facebook.com/466553496730172/photos'>
+<input type="hidden" name="access_token" value="AAACpWxUfDVwBAH41F3uLQLsZBKB4hXOJNpdJXCPZB6MKgDCRbFO5ZAiyqgWJrIOBOLgOt2IKXBudqEM6IXw8NkhYsyY4D5pyYnSRJnMOjdWOZAcNGKK6">
+message about the file: <input type=text name=message value="message"><br>
+File to upload:         <input type=file name=source><br>
+<br>
+<input type=submit value=Press> to upload the file!
+</form>
+<h1>upload to jcommon-facebook</h1>
+<form method='POST' enctype='multipart/form-data' action='https://mg.protel.com.hk/jcommon-facebook/upload'>
+<input type="text" name="session_id" value="271039552948235">
+<input type="text" name="page_id" value="271039552948235">
+title about the file: <input type=text name=message value="message"><br>
+title about the file: <input type=text name=title value="title"><br>
+description about the file: <input type=text name=description value="description"><br>
+File to upload:         <input type=file name=source><br>
+<br>
+<input type=submit value=Press> to upload the file!
+</form>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<script type="text/javascript" src="js/jquery-min-1.11.0.js"></script>
+<head>
+    <title>Generate AceessToken Example</title>
+    <script type="text/javascript">
+    window.onload = function(){
+    	var code         = jcommonfacebook_get_parameter('code');
+    	var id           = jcommonfacebook_get_parameter('id');
+    	if(code){
+    		var redirect_uri = window.location.href;
+        	redirect_uri = redirect_uri.split("?")[0];
+        	if(id)
+        		redirect_uri = redirect_uri + "?id="+id;
+    		var url_ = "./get.accesstoken/?code="+code+"&redirect_uri="+redirect_uri;
+    		if(id)url_ = url_ + "&id="+id;
+    		jQuery.support.cors = true;
+    		$.ajax({
+  			  type: "GET",
+  			  url: url_,
+  			  dataType: 'json',
+  			  error: function error(jqXHR, textStatus, errorThrown){
+  				  var error_msg = "connect error:"+jqXHR;
+				  console(error_msg);
+  			  },
+  			  success: function success(data, textStatus, jqXHR){
+  				  if(data && data.id){
+  					  //success
+  					  var access_token = data.access_token;
+  				  	  var id = data.id;
+  				  	  var name = decodeURIComponent(data.name);
+  					  console((access_token + "</br>"+id+"</br>"+name+"</br>"));
+  			      }
+  				  else{
+  					  //error
+  					  console(decodeURIComponent(data.message));
+  				  }
+  			  },
+  			  timeout: function timeout(){
+  				  var error_msg = "connect timeout";
+  				  console(error_msg);
+  			  },
+  			  crossDomain:true
+  			});
+    	}
+    }
+    
+    function console(msg){
+    	document.getElementById("console_id").innerHTML = msg;
+    }
+    
+    function jcommonfacebook_get_request(){
+    	var url = location.search;
+    	var theRequest = new Object();
+    	if(url.indexOf("?") != -1)
+    	{
+    	  var str = url.substr(1);
+    	    strs = str.split("&");
+    	  for(var i = 0; i < strs.length; i ++)
+    	  {
+    	     theRequest[strs[i].split("=")[0]]=unescape(strs[i].split("=")[1]);
+    	  }
+    	}
+    	return theRequest;
+    }
+
+    function jcommonfacebook_get_parameter(name){
+    	var theRequest = jcommonfacebook_get_request();
+    	if(name)return theRequest[name];
+    	return theRequest;
+    }    
+    
+    function go(id){
+    	/*
+    	var url_ = "./get.accesstoken";
+    	var redirect_uri = window.location.href;
+    	redirect_uri = redirect_uri.split("?")[0];
+    	if(id)
+    		redirect_uri = redirect_uri + "?id="+id;
+    	window.location.href = url_ + "?redirect_uri="+redirect_uri;
+    	*/
+    	var id           = jcommonfacebook_get_parameter('id');
+    	alert(id);
+    	var redirect_uri = window.location.href;
+    	redirect_uri = redirect_uri.split("?")[0];
+    	if(id)
+    		redirect_uri = redirect_uri + "?id="+id+"&code=code";
+    	else
+    		redirect_uri = redirect_uri + "?code=code";
+    	window.location.href = redirect_uri;
+    }
+
+    </script>
+</head>
+<body>
+<div id="console_id"></div>
+<a href="javaScript:go('271039552948235')">generate access token</a></br>
+</body>
+</html>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	version="2.5">
+   <servlet>
+	    <description>GetAccessToken</description>
+	    <display-name>GetAccessToken</display-name>
+	    <servlet-name>GetAccessToken</servlet-name>
+	    <servlet-class>org.jcommon.com.facebook.servlet.GetAccessToken</servlet-class>
+	    <load-on-startup>0</load-on-startup>
+	    <init-param>
+           <param-name>facebook_app</param-name>
+           <param-value>spotlight_facebook_app</param-value>
+        </init-param>
+	</servlet>
+	<servlet-mapping>
+	    <servlet-name>GetAccessToken</servlet-name>
+	    <url-pattern>/get.accesstoken/*</url-pattern>
+	</servlet-mapping> 
+	  
+	<servlet>
+	    <description>JcommonFacebook</description>
+	    <display-name>JcommonFacebook</display-name>
+	    <servlet-name>JcommonFacebook</servlet-name>
+	    <servlet-class>org.jcommon.com.facebook.servlet.JcommonFacebook</servlet-class>
+	    <load-on-startup>0</load-on-startup>
+	    <init-param>
+           <param-name>facebook_app</param-name>
+           <param-value>spotlight_facebook_app</param-value>
+        </init-param>
+	</servlet>
+	<servlet-mapping>
+	    <servlet-name>JcommonFacebook</servlet-name>
+	    <url-pattern>/jcommon.facebook/*</url-pattern>
+	</servlet-mapping> 
+	
+	<servlet>
+	    <description>Uploader</description>
+	    <display-name>Uploader</display-name>
+	    <servlet-name>Uploader</servlet-name>
+	    <servlet-class>org.jcommon.com.facebook.servlet.Uploader</servlet-class>
+	    <load-on-startup>0</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+	    <servlet-name>Uploader</servlet-name>
+	    <url-pattern>/upload</url-pattern>
+	</servlet-mapping> 
+	
+	<servlet>
+	    <description>FacebookMonitor</description>
+	    <display-name>FacebookMonitor</display-name>
+	    <servlet-name>FacebookMonitor</servlet-name>
+	    <servlet-class>org.jcommon.com.facebook.Callback</servlet-class>
+	    <load-on-startup>0</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+	    <servlet-name>FacebookMonitor</servlet-name>
+	    <url-pattern>/facebook.callback</url-pattern>
+	</servlet-mapping> 
+	
+	
+	<listener>
+	  <listener-class>org.jcommon.com.util.system.SystemManager</listener-class>
+    </listener>
+</web-app>
