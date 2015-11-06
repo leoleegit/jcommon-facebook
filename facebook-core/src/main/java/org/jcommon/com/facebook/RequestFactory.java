@@ -2,6 +2,7 @@ package org.jcommon.com.facebook;
 
 import java.io.File;
 
+import org.jcommon.com.facebook.config.FacebookConfig;
 import org.jcommon.com.util.JsonUtils;
 import org.jcommon.com.util.http.FileRequest;
 import org.jcommon.com.util.http.HttpListener;
@@ -11,7 +12,7 @@ public class RequestFactory {
 	 public static final String graph_url = "https://graph.facebook.com/";
 	 public static final String graph_video_url = "https://graph-video.facebook.com/";
 	 public  static boolean trusted = true;
-	 public  static String  version = "v2.5";
+	 public  static String  version = FacebookConfig.version;
 	 
 	 public static HttpRequest getFeedReqeust(HttpListener listener, String page_id, String access_token, String fields, int limit){
 		 if (limit == 0) limit = 25;

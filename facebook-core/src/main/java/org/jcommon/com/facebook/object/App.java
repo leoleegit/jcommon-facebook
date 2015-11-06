@@ -73,4 +73,10 @@ public class App extends JsonObject {
 	        sb.deleteCharAt(sb.length() - 1);
 	    return sb.toString();
 	}
+	
+	public boolean appVerify(String hub_challenge,String hub_verify_token,String hub_mode){
+	    if("subscribe".equals(hub_mode) && (verify_token!=null && verify_token.equals(hub_verify_token)))
+		  return true;
+	    return false;
+    }
 }

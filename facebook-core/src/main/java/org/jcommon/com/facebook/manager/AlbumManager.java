@@ -2,6 +2,7 @@ package org.jcommon.com.facebook.manager;
 
 import java.util.List;
 
+import org.jcommon.com.facebook.FacebookSession;
 import org.jcommon.com.facebook.RequestFactory;
 import org.jcommon.com.facebook.ResponseHandler;
 import org.jcommon.com.facebook.object.AccessToken;
@@ -16,10 +17,12 @@ public class AlbumManager extends ResponseHandler{
 	private List<Album> albums;
 	private String facebook_id;
 	private AccessToken access_token;
+	private FacebookSession session;
 	
-	public AlbumManager(String facebook_id, AccessToken access_token){
-		this.facebook_id = facebook_id;
-		this.access_token = access_token;
+	public AlbumManager(FacebookSession session){
+		this.setSession(session);
+		this.facebook_id = session.getFacebook_id();
+		this.access_token = session.getAccess_token();
 	}
 
 	public String getFacebook_id() {
@@ -78,5 +81,13 @@ public class AlbumManager extends ResponseHandler{
 
 	public void setAlbums(List<Album> albums) {
 		this.albums = albums;
+	}
+
+	public void setSession(FacebookSession session) {
+		this.session = session;
+	}
+
+	public FacebookSession getSession() {
+		return session;
 	}
 }
