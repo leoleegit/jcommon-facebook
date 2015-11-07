@@ -30,7 +30,8 @@ public class RequestFactory {
 	 }
 	 
 	 public static HttpRequest messageDetailRequest(HttpListener listener, String id, String access_token) {
-		 String fields = "from,type,picture,message,created_time,actions,updated_time,full_picture,source,link,privacy,icon,status_type,object_id";
+		 String fields = "can_reply,link,message_count,updated_time,senders,participants,"
+			 		+ "messages.order(reverse_chronological).limit(25).date_format(U){from,created_time,message,to}";
 		 return getDetailRequest(listener,id,fields,access_token);
 	 }
 	 

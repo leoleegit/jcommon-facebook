@@ -1,5 +1,6 @@
 package org.jcommon.com.facebook.update;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Timer;
@@ -8,11 +9,11 @@ import java.util.TimerTask;
 import org.jcommon.com.facebook.FacebookManager;
 import org.jcommon.com.facebook.RequestFactory;
 import org.jcommon.com.facebook.ResponseHandler;
+import org.jcommon.com.facebook.object.Conversation;
 import org.jcommon.com.facebook.object.Error;
-import org.jcommon.com.facebook.object.Feed;
 import org.jcommon.com.facebook.object.JsonObject;
+import org.jcommon.com.facebook.object.Message;
 import org.jcommon.com.facebook.object.update.ConversationsUpdate;
-import org.jcommon.com.facebook.object.update.FeedUpdate;
 import org.jcommon.com.facebook.utils.FixMap;
 import org.jcommon.com.util.http.HttpRequest;
 import org.jcommon.com.util.thread.ThreadManager;
@@ -22,8 +23,11 @@ public class MessageMonitor extends ResponseHandler{
 	private long monitor_frequency = FacebookManager.instance().getFacebookConfig().getMessage_monitor_frequency();
 	private long start_time        = FacebookManager.instance().getFacebookConfig().getStart_time() / 1000;
 	
-	private static final String request_type      = "request_name";
-	private static final int message_request      = 1;
+	private static final String request_type        = "request_name";
+	private static final int message_request        = 1;
+	private static final int message_detail_request = 2;
+	
+	private static final String message_cache_updated = "message_cache_updated";
 	
 	private String facebook_id;
 	private String access_token;
@@ -115,14 +119,50 @@ public class MessageMonitor extends ResponseHandler{
 			case message_request:{
 				messageHandler(paramHttpRequest,paramObject);
 			}
+			case message_detail_request:{
+				conversationHandler(paramHttpRequest,paramObject);
+			}
 			default:{
 				logger.warn("unknow type");
 			}
 		}
 	}
 	
-	private void messageHandler(HttpRequest paramHttpRequest,
-			JsonObject paramObject) {
+	private void conversationHandler(HttpRequest paramHttpRequest, JsonObject paramObject){
+		if(paramObject==null){
+			logger.warn("conversation object is null");
+			return;
+		}
+		if(paramObject instanceof Conversation){
+			Conversation conversation  = (Conversation) paramObject;			
+			long updated_time = (Long) paramHttpRequest.getAttibute(message_cache_updated);
+			List<Message> messages = new ArrayList<Message>();
+			
+			Message message = conversation.getMessages();
+			List<Message> data = message!=null?message.getData():null;
+			if(data!=null && data.size()>0){	
+				for(int i=data.size()-1;i>=0;i--){
+					Message msg = data.get(i);
+					if(msg.getCreated_time() > updated_time){
+						if(!message_cache.add(msg.getId()))
+							messages.add(msg);
+					}
+				}
+			}
+			
+			if(messages.size()>0){
+				logger.info("messages size:"+messages.size());
+				if(listener!=null)
+					listener.onMessage(conversation, messages);	
+			}else{
+				logger.info("no new messages come");
+			}
+		}else{
+			logger.warn("error class type:"+paramObject);
+		}
+	}
+	
+	private void messageHandler(HttpRequest paramHttpRequest, JsonObject paramObject) {
 		// TODO Auto-generated method stub
 		if(paramObject==null){
 			logger.warn("Conversations object is null");
@@ -174,11 +214,11 @@ public class MessageMonitor extends ResponseHandler{
 		if(updated_time > updated_time_cache){
 			conversations_list.put(id, updated_time);
 			logger.info(String.format("new or update one conversations : %s", id));
-//			HttpRequest re = RequestFactory.getCommentsRequest(this, id, access_token);
-//    	    addHandlerObject(re, Feed.class);
-//    	    re.setAttribute(request_type, commnet_request);
-//    	    re.setAttribute(comment_cache_updated, updated_time_cache);
-//    	    ThreadManager.instance().execute(re);
+			HttpRequest re = RequestFactory.messageDetailRequest(this, id, access_token);
+    	    addHandlerObject(re, Conversation.class);
+    	    re.setAttribute(request_type, message_detail_request);
+    	    re.setAttribute(message_cache_updated, updated_time_cache);
+    	    ThreadManager.instance().execute(re);
 		}
 	}
 

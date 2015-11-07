@@ -7,16 +7,21 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.jcommon.com.facebook.manager.AlbumManager;
+import org.jcommon.com.facebook.manager.MessageManager;
 import org.jcommon.com.facebook.manager.PageManager;
 import org.jcommon.com.facebook.object.AccessToken;
 import org.jcommon.com.facebook.object.Comment;
+import org.jcommon.com.facebook.object.Conversation;
 import org.jcommon.com.facebook.object.Feed;
+import org.jcommon.com.facebook.object.Message;
 import org.jcommon.com.facebook.update.FeedMonitor;
 import org.jcommon.com.facebook.update.FeedMonitorListener;
+import org.jcommon.com.facebook.update.MessageMonitor;
+import org.jcommon.com.facebook.update.MessageMonitorListener;
 import org.jcommon.com.facebook.utils.FacebookType;
 import org.jcommon.com.util.http.HttpRequest;
 
-public class FacebookSession implements FeedMonitorListener{
+public class FacebookSession implements FeedMonitorListener, MessageMonitorListener{
 	protected Logger logger = Logger.getLogger(getClass());
 	
 	private String facebook_id;
@@ -25,12 +30,14 @@ public class FacebookSession implements FeedMonitorListener{
 	private FacebookSessionListener listener;
 	
 	private FeedMonitor feedMonitor;
+	private MessageMonitor messageMonitor;
 	
 	private Properties properties = new Properties();
 	private Map<Object, Object> attributes = new HashMap<Object, Object>();
 	
 	private AlbumManager albumManager;
 	private PageManager  pageManager;
+	private MessageManager messageManager;
 	
 	public FacebookSession(String facebook_id,String access_token,FacebookType type){
 		this.facebook_id  = facebook_id;
@@ -39,7 +46,9 @@ public class FacebookSession implements FeedMonitorListener{
 		setAccess_token(new AccessToken(facebook_id,access_token));
 		setAlbumManager(new AlbumManager(this));
 		setPageManager(new PageManager(this));
+		setMessageManager(new MessageManager(this));
 		setFeedMonitor(new FeedMonitor(facebook_id,access_token,this));
+		setMessageMonitor(new MessageMonitor(facebook_id,access_token,this));
 		
 		logger.info(String.format("FeedMonitorEnable is %s", FacebookManager.instance().getFacebookConfig().isFeedMonitorEnable()));
 		FacebookManager.instance().putFacebookSession(this);
@@ -55,6 +64,8 @@ public class FacebookSession implements FeedMonitorListener{
 		
 		if(FacebookManager.instance().getFacebookConfig().isFeedMonitorEnable() && feedMonitor!=null && FacebookType.page == type)
 			feedMonitor.startup();
+		if(FacebookManager.instance().getFacebookConfig().isMessageMonitorEnable() && messageMonitor!=null && FacebookType.user != type)
+			messageMonitor.startup();
 		if(albumManager!=null)
 			albumManager.getAlbums();
 	}
@@ -83,6 +94,18 @@ public class FacebookSession implements FeedMonitorListener{
 		if(listener!=null){
 			for(Comment comment : comments){
 				listener.onComment(feed, comment);
+			}
+		}
+	}
+	
+
+	@Override
+	public void onMessage(Conversation conversation, List<Message> messages) {
+		// TODO Auto-generated method stub
+		logger.info(String.format("conversation %s get update messages size : %s", conversation.getId(), messages.size()));
+		if(listener!=null){
+			for(Message msg : messages){
+				listener.onMessage(conversation, msg);
 			}
 		}
 	}
@@ -183,5 +206,21 @@ public class FacebookSession implements FeedMonitorListener{
 	public static HttpRequest execute(HttpRequest request){
 		org.jcommon.com.util.thread.ThreadManager.instance().execute(request);
 		return request;
+	}
+
+	public MessageMonitor getMessageMonitor() {
+		return messageMonitor;
+	}
+
+	public void setMessageMonitor(MessageMonitor messageMonitor) {
+		this.messageMonitor = messageMonitor;
+	}
+
+	public MessageManager getMessageManager() {
+		return messageManager;
+	}
+
+	public void setMessageManager(MessageManager messageManager) {
+		this.messageManager = messageManager;
 	}
 }

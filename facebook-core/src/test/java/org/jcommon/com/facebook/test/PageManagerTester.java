@@ -9,11 +9,14 @@ import org.jcommon.com.facebook.FacebookManager;
 import org.jcommon.com.facebook.FacebookSession;
 import org.jcommon.com.facebook.FacebookSessionListener;
 import org.jcommon.com.facebook.ResponseHandler;
+import org.jcommon.com.facebook.manager.MessageManager;
 import org.jcommon.com.facebook.manager.PageManager;
 import org.jcommon.com.facebook.object.Comment;
+import org.jcommon.com.facebook.object.Conversation;
 import org.jcommon.com.facebook.object.Error;
 import org.jcommon.com.facebook.object.Feed;
 import org.jcommon.com.facebook.object.JsonObject;
+import org.jcommon.com.facebook.object.Message;
 import org.jcommon.com.facebook.object.Photo;
 import org.jcommon.com.facebook.object.Text;
 import org.jcommon.com.facebook.object.UrlObject;
@@ -39,10 +42,11 @@ public class PageManagerTester extends ResponseHandler implements FacebookSessio
 	 */
 	public static void main(String[] args) throws InterruptedException {
 		// TODO Auto-generated method stub
-//		FacebookManager.instance().getFacebookConfig().setDebug(true);
-//		FacebookManager.instance().getFacebookConfig().setFeedMonitorEnable(false);
-//		FacebookManager.instance().getFacebookConfig().setStart_time(0L);
-//		FacebookManager.instance().getFacebookConfig().setMonitor_lenght(5);
+		FacebookManager.instance().getFacebookConfig().setDebug(true);
+		FacebookManager.instance().getFacebookConfig().setFeedMonitorEnable(false);
+		FacebookManager.instance().getFacebookConfig().setMessageMonitorEnable(false);
+		FacebookManager.instance().getFacebookConfig().setStart_time(0L);
+		FacebookManager.instance().getFacebookConfig().setFeed_monitor_lenght(5);
 		
 		new PageManagerTester().startup();
 		Thread.sleep(11000L);
@@ -50,8 +54,15 @@ public class PageManagerTester extends ResponseHandler implements FacebookSessio
 		//postPhoto(session.getPageManager());
 		//postVedio(session.getPageManager());
 		
-		String data = "{\"object\":\"page\",\"entry\":[{\"id\":\"271039552948235\",\"time\":1446829106,\"changes\":[{\"field\":\"feed\",\"value\":{\"item\":\"comment\",\"verb\":\"add\",\"comment_id\":\"928837367168447_1065235330195316\",\"post_id\":\"271039552948235_1065271373525045\",\"parent_id\":\"271039552948235_928837383835112\",\"sender_id\":271039552948235,\"created_time\":1446829106,\"message\":\"hi men\",\"sender_name\":\"Newton\"}}]}]}";
-		FacebookManager.instance().onCallback(data);
+		postMessage(session.getMessageManager());
+		
+//		String data = "{\"object\":\"page\",\"entry\":[{\"id\":\"271039552948235\",\"time\":1446829106,\"changes\":[{\"field\":\"feed\",\"value\":{\"item\":\"comment\",\"verb\":\"add\",\"comment_id\":\"928837367168447_1065235330195316\",\"post_id\":\"271039552948235_1065271373525045\",\"parent_id\":\"271039552948235_928837383835112\",\"sender_id\":271039552948235,\"created_time\":1446829106,\"message\":\"hi men\",\"sender_name\":\"Newton\"}}]}]}";
+//		FacebookManager.instance().onCallback(data);
+	}
+	
+	public static void postMessage(MessageManager page){
+		String conversation_id = "";
+		page.sendMessage(conversation_id, new Text("hello text!"), listener);
 	}
 	
 	public static void postText(PageManager page){
@@ -93,6 +104,12 @@ public class PageManagerTester extends ResponseHandler implements FacebookSessio
 		// TODO Auto-generated method stub
 		logger.info(String.format("feed %s --> %s", feed.getId(),comment.toJson()));
 	}
+	
+	@Override
+	public void onMessage(Conversation conversation, Message messages) {
+		// TODO Auto-generated method stub
+		logger.info(String.format("conversation %s --> %s", conversation.getId(),messages.toJson()));
+	}
 
 	@Override
 	public void onError(HttpRequest paramHttpRequest, Error paramError) {
@@ -128,7 +145,5 @@ public class PageManagerTester extends ResponseHandler implements FacebookSessio
 		// TODO Auto-generated method stub
 		return false;
 	}
-	
-	
 
 }

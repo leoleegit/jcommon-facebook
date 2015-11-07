@@ -4,6 +4,7 @@ public class DefaultResponse extends JsonObject {
 	private String response;
 	private String id;
 	private String post_id;
+	private String uuid;
 	
 	public DefaultResponse(String response, boolean decode){
 		super(response,decode);
@@ -37,5 +38,13 @@ public class DefaultResponse extends JsonObject {
 
 	public void setPost_id(String post_id) {
 		this.post_id = post_id;
+	}
+
+	public String getUuid() {
+		return uuid;
+	}
+
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
 	}
 }
