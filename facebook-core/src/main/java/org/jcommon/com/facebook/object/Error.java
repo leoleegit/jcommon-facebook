@@ -9,12 +9,16 @@ public class Error extends JsonObject {
 	private String error_user_msg;
 	private String fbtrace_id;
 	
+	public Error(String json, boolean decode){
+		super(json,decode);
+	}
+	
 	public Error(String json){
-		super(json);
+		super(json,true);
 	}
 	
 	public Error(int code, String message){
-		super(null);
+		super(null,true);
 		this.code = code;
 		this.message = message;
 	}

@@ -9,17 +9,23 @@ public class AccessToken extends JsonObject{
 	private String name;
 	
 	private String access_token;
+	private String token_type;
 	private String category;
 	private String perms;
 	private String expired;
 	  
+	public AccessToken(String json, boolean decode) {
+		super(json,decode);
+		// TODO Auto-generated constructor stub
+	}
+	
 	public AccessToken(String json) {
-		super(json);
+		super(json,true);
 		// TODO Auto-generated constructor stub
 	}
 	
 	public AccessToken(String id, String access_token) {
-		super(null);
+		super(null,true);
 		// TODO Auto-generated constructor stub
 		this.id  = id;
 		this.access_token = access_token;
@@ -93,5 +99,13 @@ public class AccessToken extends JsonObject{
 				}
 			}
 		}
+	}
+
+	public void setToken_type(String token_type) {
+		this.token_type = token_type;
+	}
+
+	public String getToken_type() {
+		return token_type;
 	}
 }

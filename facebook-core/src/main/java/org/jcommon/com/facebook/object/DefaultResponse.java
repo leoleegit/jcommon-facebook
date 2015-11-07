@@ -5,8 +5,13 @@ public class DefaultResponse extends JsonObject {
 	private String id;
 	private String post_id;
 	
+	public DefaultResponse(String response, boolean decode){
+		super(response,decode);
+		this.response = response;
+	}
+	
 	public DefaultResponse(String response){
-		super(response);
+		super(response,true);
 		this.response = response;
 	}
 	

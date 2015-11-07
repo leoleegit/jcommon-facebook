@@ -14,6 +14,26 @@ public class RequestFactory {
 	 public  static boolean trusted = true;
 	 public  static String  version = FacebookConfig.version;
 	 
+	 public static HttpRequest getMessageReqeust(HttpListener listener, String page_id, String access_token, String fields, int limit){
+		 if (limit == 0) limit = 25;
+	     String[] keys = { "access_token", "date_format", "limit", "fields" };
+	     String[] values = { access_token,  "U", String.valueOf(limit), fields };
+
+	     String url = graph_url + version + "/" + page_id + "/conversations";
+	     url = JsonUtils.toRequestURL(url, keys, values);
+	     return new HttpRequest(url, listener, trusted);
+	 }
+	 
+	 public static HttpRequest messageUpdateReqeust(HttpListener listener, String page_id, String access_token, int limit){
+		 String fields = "messages.limit(1).order(reverse_chronological).date_format(U).fields(created_time),updated_time";
+	     return getMessageReqeust(listener,page_id,fields,access_token,limit);
+	 }
+	 
+	 public static HttpRequest messageDetailRequest(HttpListener listener, String id, String access_token) {
+		 String fields = "from,type,picture,message,created_time,actions,updated_time,full_picture,source,link,privacy,icon,status_type,object_id";
+		 return getDetailRequest(listener,id,fields,access_token);
+	 }
+	 
 	 public static HttpRequest getFeedReqeust(HttpListener listener, String page_id, String access_token, String fields, int limit){
 		 if (limit == 0) limit = 25;
 	     String[] keys = { "access_token", "date_format", "limit", "fields" };
@@ -24,20 +44,25 @@ public class RequestFactory {
 	     return new HttpRequest(url, listener, trusted);
 	 }
 	 
+	 public static HttpRequest feedUpdateReqeust(HttpListener listener, String feed_id, String access_token){
+		 String fields = "updated_time,comments.limit(1).order(reverse_chronological).date_format(U).fields(created_time)";
+	     return getDetailRequest(listener,feed_id,fields,access_token);
+	 }
+	 
 	 //271039552948235/feed?fields=updated_time,comments.limit(1).date_format(U).fields(created_time)&date_format=U
 	 public static HttpRequest feedUpdateReqeust(HttpListener listener, String page_id, String access_token, int limit) {
 	     String fields = "updated_time,comments.limit(1).order(reverse_chronological).date_format(U).fields(created_time)";
 	     return getFeedReqeust(listener, page_id, access_token, fields, limit);
 	 }
 	 
-	 public static HttpRequest getFeedDetailRequest(HttpListener listener, String id, String access_token) {
+	 public static HttpRequest feedDetailRequest(HttpListener listener, String id, String access_token) {
 		 String fields = "from,type,picture,message,created_time,actions,updated_time,full_picture,source,link,privacy,icon,status_type,object_id";
 		 return getDetailRequest(listener,id,fields,access_token);
 	 }
 	 
 	 public static HttpRequest getCommentsRequest(HttpListener listener, String id, String access_token) {
-		 String fields = "from,type,picture,message,created_time,actions,updated_time,full_picture,source,link,privacy,icon,status_type,object_id"
-		 		+ "comments.order(reverse_chronological).limit(25).date_format(U){message,from,created_time}";
+		 String fields = "from,type,picture,message,created_time,actions,updated_time,full_picture,source,link,privacy,icon,status_type,object_id,"
+		 		+ "comments.order(reverse_chronological).limit(25).date_format(U){message,from,created_time,comments.order(reverse_chronological).limit(25).date_format(U){message,from,created_time}}";
 		 return getDetailRequest(listener,id,fields,access_token);
 	 }
 	 
@@ -61,7 +86,7 @@ public class RequestFactory {
 	 }
 	 
 	 public static HttpRequest getAboutMeReqeust(HttpListener listener, String access_token){
-	    return getDetailRequest(listener, "me", "link,location,work,gender,timezone,languages,locale,picture", access_token);
+	    return getDetailRequest(listener, "me", "name,link,location,work,gender,timezone,languages,locale,picture", access_token);
 	 }
 	 
 	 public static String getAccessCodeUrl(String redirect_uri, String permissions, String app_id) {
@@ -127,7 +152,7 @@ public class RequestFactory {
 	 
 	 public static HttpRequest publishRequest(HttpListener listener, String url, String[] keys, String[] values){
 		 url = JsonUtils.toRequestURL(url, keys, values);
-		 return new HttpRequest(url, null, HttpRequest.POST, listener, trusted);
+		 return new HttpRequest(url, "", HttpRequest.POST, listener, trusted);
 	 }
 	 
 	 public static HttpRequest publishMediaRequest(HttpListener listener, String url, File file, String[] keys, String[] values){

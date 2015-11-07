@@ -7,7 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jcommon.com.facebook.object.Comment;
+import org.jcommon.com.facebook.object.update.FeedUpdate;
 import org.jcommon.com.facebook.utils.ReflectUtils;
+import org.jcommon.com.util.JsonObject;
 
 public class ReflectUtilsTest {
 	private  List<Comment> data;
@@ -23,14 +25,16 @@ public class ReflectUtilsTest {
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		ReflectUtilsTest test = new ReflectUtilsTest();
+		//ReflectUtilsTest test = new ReflectUtilsTest();
+		FeedUpdate test = new FeedUpdate(null);
 		for (Class<?> clazz = test.getClass(); 
 			      clazz != Object.class; clazz = clazz.getSuperclass()) {
 	        Field[] fs = clazz.getDeclaredFields();
 	        Type type = null;
 	        for (Field f : fs) {
-	        	type = clazz.getGenericSuperclass();
-	        	System.out.println(f.getName() + ": "+ toString((ParameterizedType)f.getGenericType()));
+	        	//type = clazz.getGenericSuperclass();
+	        	System.out.println(f.getName() + ": "+ f.getType() + " : " + JsonObject.class.isAssignableFrom(f.getType()));
+	        	//System.out.println(f.getName() + ": "+ toString((ParameterizedType)f.getGenericType()));
 	        }     
 		}
 	}

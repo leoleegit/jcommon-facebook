@@ -4,8 +4,8 @@ public class Profile extends JsonObject {
     private String id;
 	private String name;
 	
-	public Profile(String json) {
-		super(json);
+	public Profile(String json, boolean decode) {
+		super(json,decode);
 		// TODO Auto-generated constructor stub
 	}
 	

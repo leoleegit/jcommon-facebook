@@ -8,14 +8,10 @@
 	    <servlet-name>GetAccessToken</servlet-name>
 	    <servlet-class>org.jcommon.com.facebook.servlet.GetAccessToken</servlet-class>
 	    <load-on-startup>0</load-on-startup>
-	    <init-param>
-           <param-name>facebook_app</param-name>
-           <param-value>spotlight_facebook_app</param-value>
-        </init-param>
 	</servlet>
 	<servlet-mapping>
 	    <servlet-name>GetAccessToken</servlet-name>
-	    <url-pattern>/get.accesstoken/*</url-pattern>
+	    <url-pattern>/fb.accesstoken/*</url-pattern>
 	</servlet-mapping> 
 	  
 	<servlet>
@@ -24,38 +20,34 @@
 	    <servlet-name>JcommonFacebook</servlet-name>
 	    <servlet-class>org.jcommon.com.facebook.servlet.JcommonFacebook</servlet-class>
 	    <load-on-startup>0</load-on-startup>
-	    <init-param>
-           <param-name>facebook_app</param-name>
-           <param-value>spotlight_facebook_app</param-value>
-        </init-param>
 	</servlet>
 	<servlet-mapping>
 	    <servlet-name>JcommonFacebook</servlet-name>
-	    <url-pattern>/jcommon.facebook/*</url-pattern>
+	    <url-pattern>/fb.common/*</url-pattern>
 	</servlet-mapping> 
 	
 	<servlet>
-	    <description>Uploader</description>
-	    <display-name>Uploader</display-name>
-	    <servlet-name>Uploader</servlet-name>
-	    <servlet-class>org.jcommon.com.facebook.servlet.Uploader</servlet-class>
+	    <description>MediaServlet</description>
+	    <display-name>MediaServlet</display-name>
+	    <servlet-name>MediaServlet</servlet-name>
+	    <servlet-class>org.jcommon.com.facebook.servlet.MediaServlet</servlet-class>
 	    <load-on-startup>0</load-on-startup>
 	</servlet>
 	<servlet-mapping>
-	    <servlet-name>Uploader</servlet-name>
-	    <url-pattern>/upload</url-pattern>
+	    <servlet-name>MediaServlet</servlet-name>
+	    <url-pattern>/fb.media/*</url-pattern>
 	</servlet-mapping> 
 	
 	<servlet>
 	    <description>FacebookMonitor</description>
 	    <display-name>FacebookMonitor</display-name>
 	    <servlet-name>FacebookMonitor</servlet-name>
-	    <servlet-class>org.jcommon.com.facebook.Callback</servlet-class>
+	    <servlet-class>org.jcommon.com.facebook.servlet.Callback</servlet-class>
 	    <load-on-startup>0</load-on-startup>
 	</servlet>
 	<servlet-mapping>
 	    <servlet-name>FacebookMonitor</servlet-name>
-	    <url-pattern>/facebook.callback</url-pattern>
+	    <url-pattern>/fb.callback</url-pattern>
 	</servlet-mapping> 
 	
 	

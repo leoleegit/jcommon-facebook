@@ -69,8 +69,10 @@ public class AppManager extends MapStore{
 			logger.info("access_token not be null");
 			return null;
 		}
+		logger.info(access_token.getAccess_token());
 		HttpRequest facebook_request = RequestFactory.getAboutMeReqeust(null, access_token.getAccess_token());
         facebook_request.run();
+        logger.info("Result:" + facebook_request.getResult());
         return new User(facebook_request.getResult());
 	}
 	
@@ -87,9 +89,11 @@ public class AppManager extends MapStore{
 			logger.info("access_token not be null");
 			return null;
 		}
+		logger.info(access_token.getAccess_token());
 		HttpRequest facebook_request = RequestFactory.getAllAccessTokenReqeust(null, access_token.getAccess_token());
 	    facebook_request.run();
 	    String data = facebook_request.getResult();
+	    logger.info("Result:" + data);
 	    return new AccessToken(data).getData();
 	}
 	
@@ -103,23 +107,8 @@ public class AppManager extends MapStore{
 		HttpRequest facebook_request = RequestFactory.getAccessTokenReqeust(null,app.getApi_id(),app.getApp_secret(),code,redirect_uri);
         facebook_request.run();
         String access_token_ = facebook_request.getResult();
-        if ((access_token_ != null) && (access_token_.startsWith("access_token="))) {
-        	access_token_ = access_token_.replaceAll("access_token=", "");
-        } else {
-            logger.info("get access_token error:" + access_token_);
-            return null;
-        }
-        logger.info("access_token_:"+access_token_);
-        AccessToken at = new AccessToken(null);
-        if ((access_token_ != null) && (access_token_.indexOf("&") != -1)) {
-            String access_token = access_token_.substring(0, access_token_.indexOf("&"));
-            String expires = (access_token_.indexOf("expires=") != -1)?access_token_.substring(access_token_.indexOf("=")+1):"0";
-            at.setAccess_token(access_token);
-            at.setExpired(expires);
-        }else{
-        	at.setAccess_token(access_token_);
-        	at.setExpired("0");
-        }
+        logger.info("Result:" + access_token_);
+        AccessToken at = new AccessToken(access_token_);
         return at;
 	}
 }

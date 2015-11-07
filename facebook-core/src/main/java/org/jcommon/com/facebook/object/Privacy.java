@@ -4,8 +4,8 @@ public class Privacy extends JsonObject{
 	private String description;
 	private String value;
 	
-	public Privacy(String json) {
-		super(json);
+	public Privacy(String json, boolean decode) {
+		super(json,decode);
 		// TODO Auto-generated constructor stub
 	}
 

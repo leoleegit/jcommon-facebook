@@ -35,21 +35,18 @@ public abstract class ResponseHandler implements HttpListener{
 			logger.info(sResult.toString());
 	    String result = sResult.toString();
 
-	    JSONObject reObj = JsonUtils.getJSONObject(result);
 	    Class<? extends JsonObject> type = getResponseObject(reqeust);
 	    if(config.isDebug())
 	    	logger.info("responseObject:"+type);
 	    Error error_e = new Error(-1,"spotlight system error");
-	    if (reObj != null) {
-	    	if (reObj.has("error")) {
-	    		error_e = new Error(result);
-		        onError(reqeust, error_e);
-		        return;
-	        }
+	    if (result != null) {
 	        if (type!=null){
 		        try {
 		        	JsonObject args = ObjectFactory.newInstance(type, result);
-		            onOk(reqeust, args);
+		        	if(args.getError()!=null)
+		        		onError(reqeust, args.getError());
+		        	else
+		        		onOk(reqeust, args);
 		            return;
 		        }
 		        catch (SecurityException e) {

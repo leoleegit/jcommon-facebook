@@ -1,6 +1,7 @@
 package org.jcommon.com.facebook.update;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -14,27 +15,57 @@ import org.jcommon.com.facebook.object.Feed;
 import org.jcommon.com.facebook.object.JsonObject;
 import org.jcommon.com.facebook.object.update.FeedUpdate;
 import org.jcommon.com.facebook.utils.FixMap;
+import org.jcommon.com.util.health.Status;
+import org.jcommon.com.util.health.StatusManager;
 import org.jcommon.com.util.http.HttpRequest;
 import org.jcommon.com.util.thread.ThreadManager;
 
 public class FeedMonitor extends ResponseHandler{
-	private static final int  monitor_lenght    = 100;
-	private static final long monitor_frequency = 10000L;
+	private int  monitor_lenght    = FacebookManager.instance().getFacebookConfig().getFeed_monitor_lenght();
+	private long monitor_frequency = FacebookManager.instance().getFacebookConfig().getFeed_monitor_frequency();
+	private long start_time        = FacebookManager.instance().getFacebookConfig().getStart_time() / 1000;
 	
 	private static final String request_type      = "request_name";
 	private static final int feed_request         = 1;
 	private static final int feed_detail_request  = 2;
 	private static final int commnet_request      = 3;
+	private static final int feed_update_request  = 4;
 	
 	private static final String comment_cache_updated = "comment_cache_updated";
+	
 	private String facebook_id;
 	private String access_token;
 	private FeedMonitorListener listener;
 	
+	public final String name = "FBAPI";
+	private Status status = new Status(name);
+	
 	private boolean run;
 	private Timer timer_graph = null;
-	private long start_time   = FacebookManager.instance().getFacebookConfig().getStart_time();
+	
 	private FixMap<String, Long> post_list    = new FixMap<String, Long>(monitor_lenght);
+	private LinkedList<String> comment_cache  = new LinkedList<String>(){
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		
+		private final static int fix_size = 300;
+		
+		public boolean add(String e){
+			boolean exist = false;
+			if(e==null)
+				return true;
+			if(super.contains(e)){
+				exist = true;
+			}
+			super.add(e);
+			if(super.size()>fix_size)
+				super.remove(0);
+			return exist;
+		}
+	};
 	
 	public FeedMonitor(String facebook_id, String access_token){
 		this.setFacebook_id(facebook_id);
@@ -49,6 +80,7 @@ public class FeedMonitor extends ResponseHandler{
 	
 	public void startup(){
 		logger.info(facebook_id);
+		run = true;
 		timer_graph =  org.jcommon.com.util.thread.TimerTaskManger.instance().schedule("FeedMonitor-Graph", new TimerTask(){
 	    	public void run(){
 	    		if(!run)return;
@@ -63,7 +95,7 @@ public class FeedMonitor extends ResponseHandler{
 	
 	public void shutdown() {
 		logger.info(facebook_id);
-		this.run = false;
+		run = false;
 	    if (this.timer_graph != null) {
 	        try {
 		        this.timer_graph.cancel();
@@ -72,12 +104,15 @@ public class FeedMonitor extends ResponseHandler{
 	    	    logger.error("", e);
 	        }
 	    }
+	    post_list.clear();
+	    comment_cache.clear();
 	}
 	
 	@Override
 	public void onError(HttpRequest paramHttpRequest, Error paramError) {
 		// TODO Auto-generated method stub
 		logger.error(paramError.toJson());
+		setStatus(paramError.getMessage());
 	}
 
 	@Override
@@ -111,10 +146,42 @@ public class FeedMonitor extends ResponseHandler{
 				commentHandler(paramHttpRequest,paramObject);
 				break;
 			}
+			case feed_update_request:{
+				if(paramObject instanceof FeedUpdate){
+					FeedUpdate feed = (FeedUpdate) paramObject;
+					checkFeedUpdate(feed,true);
+				}else{
+					logger.warn("error class type:"+paramObject);
+				}
+				break;
+			}
 			default:{
 				logger.warn("unknow type");
 			}
 		}
+		setStatus("OK");  
+	}
+	
+	private List<Comment> commentHandler(Feed feed, List<Comment> data, long updated_time){
+		List<Comment> comments = new ArrayList<Comment>();
+		if(data!=null && data.size()>0){			
+			for(int i=data.size()-1;i>=0;i--){
+				Comment comment = data.get(i);
+				if(comment.getCreated_time() > updated_time){
+					if(!comment_cache.add(comment.getId()))
+						comments.add(comment);
+				}
+				if(comment.getComments()!=null){
+					List<Comment> comments_ = commentHandler(feed, comment.getComments().getData(), updated_time);
+					if(comments_!=null && comments_.size()>0){
+						comments.addAll(comments_);
+					}
+				}
+			}		
+		}else{
+			logger.info("Feed comment data is Empty");
+		}
+		return comments;
 	}
 	
 	private void commentHandler(HttpRequest paramHttpRequest, JsonObject paramObject){
@@ -123,27 +190,16 @@ public class FeedMonitor extends ResponseHandler{
 			return;
 		}
 		if(paramObject instanceof Feed){
-			Feed feed  = (Feed) paramObject;
-			
+			Feed feed  = (Feed) paramObject;			
 			List<Comment> data= feed.getCommentList();
-			
-			if(data!=null && data.size()>0){
-				List<Comment> comments = new ArrayList<Comment>();
-				long updated_time = (Long) paramHttpRequest.getAttibute(comment_cache_updated);
-				for(int i=data.size()-1;i>=0;i--){
-					Comment comment = data.get(i);
-					if(comment.getCreated_time() > updated_time)
-						comments.add(comment);
-				}
-				if(comments.size()>0){
-					logger.info("comments size:"+comments.size());
-					if(listener!=null)
-						listener.onComment(feed, comments);
-				}else{
-					logger.info("no new comment come");
-				}
+			long updated_time = (Long) paramHttpRequest.getAttibute(comment_cache_updated);
+			List<Comment> comments = commentHandler(feed,data,updated_time);
+			if(comments.size()>0){
+				logger.info("comments size:"+comments.size());
+				if(listener!=null)
+					listener.onComment(feed, comments);
 			}else{
-				logger.info("feed data is Empty");
+				logger.info("no new comment come");
 			}
 		}else{
 			logger.warn("error class type:"+paramObject);
@@ -170,28 +226,7 @@ public class FeedMonitor extends ResponseHandler{
 				}else{
 					for(int i=data.size()-1;i>=0;i--){
 						FeedUpdate feed = data.get(i);
-						long updated_time       = feed.getUpdated_time();
-						long updated_time_cache = start_time;
-						String id         = feed.getId();
-						if(!post_list.containsKey(id)){
-							logger.info(String.format("new a feed : %s", id));
-							HttpRequest re = RequestFactory.getFeedDetailRequest(this, id, access_token);
-				    	    FeedMonitor.this.addHandlerObject(re, Feed.class);
-				    	    re.setAttribute(request_type, feed_detail_request);
-				    	    ThreadManager.instance().execute(re);
-						}else{
-							updated_time_cache = post_list.get(id);
-						}
-						
-						if(updated_time > updated_time_cache){
-							post_list.put(id, updated_time);
-							logger.info(String.format("new or update one feed : %s", id));
-							HttpRequest re = RequestFactory.getCommentsRequest(this, id, access_token);
-				    	    FeedMonitor.this.addHandlerObject(re, Feed.class);
-				    	    re.setAttribute(request_type, commnet_request);
-				    	    re.setAttribute(comment_cache_updated, updated_time_cache);
-				    	    ThreadManager.instance().execute(re);
-						}
+						checkFeedUpdate(feed,false);
 					}
 				}
 			}else{
@@ -199,6 +234,50 @@ public class FeedMonitor extends ResponseHandler{
 			}
 		}else{
 			logger.warn("error class type:"+paramObject);
+		}
+	}
+	
+	public void checkFeedUpdate(String feed_id){
+		logger.info(feed_id);
+		HttpRequest re = RequestFactory.feedUpdateReqeust(this, feed_id, access_token);
+		addHandlerObject(re, FeedUpdate.class);
+ 	    re.setAttribute(request_type, feed_update_request);
+ 	    ThreadManager.instance().execute(re);
+	}
+	
+	public synchronized void checkFeedUpdate(FeedUpdate feed, boolean check_comment_only){
+		if(feed==null || feed.getId()==null || feed.getUpdated_time()==null)
+			return;
+		long updated_time       = feed.getUpdated_time();
+		long updated_time_cache = start_time;
+		String id         = feed.getId();
+		
+		if(!post_list.containsKey(id) && !check_comment_only){
+			logger.info(String.format("new a feed : %s", id));
+			post_list.put(id, updated_time);
+			HttpRequest re = RequestFactory.feedDetailRequest(this, id, access_token);
+    	    FeedMonitor.this.addHandlerObject(re, Feed.class);
+    	    re.setAttribute(request_type, feed_detail_request);
+    	    ThreadManager.instance().execute(re);
+		}else if(post_list.containsKey(id)){
+			updated_time_cache = post_list.get(id);
+		}
+		if(FacebookManager.instance().getFacebookConfig().isDebug())
+			logger.info(String.format("updated time:%s;updated_time_cache:%s", updated_time,updated_time_cache));
+		
+		if(updated_time > updated_time_cache){
+			if(feed.hasCommentUpdate()){
+				if(!check_comment_only)
+					post_list.put(id, updated_time);
+				logger.info(String.format("new or update one feed : %s", id));
+				HttpRequest re = RequestFactory.getCommentsRequest(this, id, access_token);
+	    	    FeedMonitor.this.addHandlerObject(re, Feed.class);
+	    	    re.setAttribute(request_type, commnet_request);
+	    	    re.setAttribute(comment_cache_updated, updated_time_cache);
+	    	    ThreadManager.instance().execute(re);
+			}else{
+				logger.info("Feed comment data is Empty");
+			}
 		}
 	}
 
@@ -233,5 +312,11 @@ public class FeedMonitor extends ResponseHandler{
 	public void setRun(boolean run) {
 		this.run = run;
 	}
+	
+	public void setStatus(String status){
+		this.status.setStatus(status);
+		if (StatusManager.instance() != null)
+			StatusManager.instance().addStatus(this.status);
+	 }
 
 }

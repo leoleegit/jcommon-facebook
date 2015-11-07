@@ -4,8 +4,8 @@ public class Link extends JsonObject {
 	private String name;
 	private String link;
 	
-	public Link(String json) {
-		super(json);
+	public Link(String json, boolean decode) {
+		super(json,decode);
 		// TODO Auto-generated constructor stub
 	}
 

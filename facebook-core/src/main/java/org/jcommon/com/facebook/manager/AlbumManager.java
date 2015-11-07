@@ -11,7 +11,6 @@ import org.jcommon.com.facebook.object.Error;
 import org.jcommon.com.facebook.object.JsonObject;
 import org.jcommon.com.facebook.utils.AlbumType;
 import org.jcommon.com.util.http.HttpRequest;
-import org.jcommon.com.util.thread.ThreadManager;
 
 public class AlbumManager extends ResponseHandler{
 	private List<Album> albums;
@@ -45,7 +44,7 @@ public class AlbumManager extends ResponseHandler{
 		logger.info(facebook_id);
 		HttpRequest re = RequestFactory.getAlbumRequest(this, facebook_id, access_token.getAccess_token());
  	    addHandlerObject(re, Album.class);
- 	    ThreadManager.instance().execute(re);
+ 	    FacebookSession.execute(re);
 	}
 	
 	public Album getAlbum(AlbumType type){
@@ -74,6 +73,7 @@ public class AlbumManager extends ResponseHandler{
 		if(paramObject instanceof Album){
 			Album album = (Album) paramObject;
 			setAlbums(album.getData());
+			logger.info("albums size:"+ (this.albums!=null?albums.size():0));
 		}else{
 			logger.warn("error class type:"+paramObject);
 		}

@@ -15,9 +15,12 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.jcommon.com.facebook.AppManager;
+import org.jcommon.com.facebook.FacebookManager;
+import org.jcommon.com.facebook.FacebookSession;
 import org.jcommon.com.facebook.object.AccessToken;
 import org.jcommon.com.facebook.object.App;
 import org.jcommon.com.facebook.object.User;
+import org.jcommon.com.facebook.utils.FacebookType;
 import org.jcommon.com.util.http.ResourceServlet;
 
 public class GetAccessToken extends ResourceServlet{
@@ -32,7 +35,7 @@ public class GetAccessToken extends ResourceServlet{
 
     public void init(ServletConfig config)throws ServletException{
 	    super.init(config);
-	    logger.info("JcommonFacebook running ...");
+	    logger.info("GetAccessToken running ...");
     }
     
     final String[] files = {"help.PNG","access_token.html"};
@@ -64,17 +67,19 @@ public class GetAccessToken extends ResourceServlet{
 	  		return;
 	  	}
 	  	String code         = request.getParameter("code");
-	  	String id           = request.getParameter("id");
-	  	String all          = request.getParameter("all");
-	  	String redirect_uri = request.getParameter("redirect_uri");
-	  	App app   = id!=null?AppManager.instance().getApp(id):AppManager.instance().getDefaultApp();
-	  	logger.info(String.format("app:%s,id%s", app,id));
+	  	String token_type   = request.getParameter("type");
+	  	String app_id       = request.getParameter("app_id");
+	  	String all          = request.getParameter("all"); 	  	
 	  	
-	  	org.jcommon.com.facebook.object.Error error = new org.jcommon.com.facebook.object.Error(null);
+	  	String redirect_uri = request.getParameter("redirect_uri");
+	  	App app   = app_id!=null?AppManager.instance().getApp(app_id):AppManager.instance().getDefaultApp();
+	  	logger.info(String.format("app:%s;app_id:%s;all:%s;id:%s", app,app_id,all,token_type));
+	  	
+	  	org.jcommon.com.facebook.object.Error error = new org.jcommon.com.facebook.object.Error(null,true);
 	  	error.setType("get_access_token");
 	  	
 	  	if(app==null){
-	  		error.setMessage("can find facebook app by :"+id);
+	  		error.setMessage("can find facebook app by :"+app_id);
 	  		response.getWriter().println(error.toJson());
 	  		return;
 	  	}
@@ -86,12 +91,16 @@ public class GetAccessToken extends ResourceServlet{
 	  		response.sendRedirect(url);
 	  	}else{
 	  		AccessToken token = AppManager.getAccessToken(app, redirect_uri, code);
-	  		if(token==null || token.getAccess_token()==null){
+	  		if(token!=null && token.getError()!=null){
+		  		response.getWriter().println(token.getError().toJson());
+	        	return;
+	  		}
+	  		else if(token==null || token.getAccess_token()==null){
 	  			error.setMessage("get access token fail, please try again later.");
 		  		response.getWriter().println(error.toJson());
 		  		return;
 	  		}
-	  		if(all==null){
+	  		if(FacebookType.user.name().equals(token_type)){
 	  			User user = AppManager.aboutMe(token);
 	  			if(user!=null && user.getId()!=null && user.getName()!=null){
 	  				token.setId(user.getId());
@@ -106,9 +115,23 @@ public class GetAccessToken extends ResourceServlet{
 			  		response.getWriter().println(error.toJson());
 			  		return;
 	  			}
-	  			String json              = AccessToken.list2Json(tokens);
-	  			logger.info(json);
-	  			response.getWriter().println(json);
+	  			if(all!=null){
+	  				String json              = AccessToken.list2Json(tokens);
+		  			logger.info(json);
+		  			response.getWriter().println(json);
+	  			}else{
+	  				FacebookSession session = FacebookManager.instance().getDefaultFacebookSessions(FacebookType.page);
+	  				if(session!=null){
+	  					String facebook_id = session.getFacebook_id();
+	  					for(AccessToken tk : tokens){
+	  						if(facebook_id!=null && facebook_id.equals(tk.getId())){
+	  				  			logger.info(tk.toJson());
+	  				  			response.getWriter().println(tk.toJson());
+	  				  			break;
+	  						}
+	  					}
+	  				}
+	  			}
 	  		}
 	  	}
   	}

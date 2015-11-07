@@ -2,13 +2,19 @@ package org.jcommon.com.facebook.object;
 
 import java.io.File;
 
-public class Photo {
+public class Photo extends Media{
 	private String message;
-	private File media;
 	
 	public Photo(String message, File media){
-		this.media  = media;
-		this.message= message;
+		super(null,true);
+		setMessage(message);
+		setMedia(media);
+	}
+	
+	public Photo(String message, String url){
+		super(null,true);
+		setMessage(message);
+		setUrl(url);
 	}
 
 	public String getMessage() {
@@ -17,13 +23,5 @@ public class Photo {
 
 	public void setMessage(String message) {
 		this.message = message;
-	}
-
-	public File getMedia() {
-		return media;
-	}
-
-	public void setMedia(File media) {
-		this.media = media;
 	}
 }

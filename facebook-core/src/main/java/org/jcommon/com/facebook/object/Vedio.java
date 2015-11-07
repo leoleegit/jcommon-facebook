@@ -2,15 +2,22 @@ package org.jcommon.com.facebook.object;
 
 import java.io.File;
 
-public class Vedio {
+public class Vedio extends Media{
 	private String title;
 	private String description;
-	private File media;
 	
 	public Vedio(String title, String description, File media){
-		this.title       = title;
-		this.description = description;
-		this.media       = media;
+		super(null,true);
+		setTitle(title);
+		setDescription(description);
+		setMedia(media);
+	}
+	
+	public Vedio(String title, String description, String url){
+		super(null,true);
+		setTitle(title);
+		setDescription(description);
+		setUrl(url);
 	}
 
 	public String getTitle() {
@@ -27,13 +34,5 @@ public class Vedio {
 
 	public void setDescription(String description) {
 		this.description = description;
-	}
-
-	public File getMedia() {
-		return media;
-	}
-
-	public void setMedia(File media) {
-		this.media = media;
 	}
 }

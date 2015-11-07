@@ -5,8 +5,8 @@ public class Cover extends JsonObject {
 	private String source;
 	private String offset_y;
 	
-	public Cover(String json) {
-		super(json);
+	public Cover(String json, boolean decode) {
+		super(json,decode);
 		// TODO Auto-generated constructor stub
 	}
 

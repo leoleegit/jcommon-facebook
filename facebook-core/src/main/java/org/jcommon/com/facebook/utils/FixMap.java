@@ -20,7 +20,8 @@ public class FixMap<K, V> extends HashMap<K,V>{
 	}
 	
 	public V put(K key, V value) {
-		keys.add(key);
+		if(!keys.contains(key))
+			keys.add(key);
 		V v = super.put(key, value);
 		
 		if(keys.size()>fixSize){

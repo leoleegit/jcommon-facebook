@@ -29,7 +29,7 @@ public class PageManager{
 			logger.info("text can not be null");
 			return null;
 		}
-		return RequestFactory.publishFeedRequest(handler, access_token.getAccess_token(), page_id, text.getMessage());
+		return FacebookSession.execute(RequestFactory.publishFeedRequest(handler, access_token.getAccess_token(), page_id, text.getMessage()));
 	}
 	
 	public HttpRequest publishComment(String post_id, Text text, ResponseHandler handler){
@@ -37,7 +37,7 @@ public class PageManager{
 			logger.info("text or post id is null");
 			return null;
 		}
-		return RequestFactory.publishCommnetRequest(handler, access_token.getAccess_token(), post_id, text.getMessage());
+		return FacebookSession.execute(RequestFactory.publishCommnetRequest(handler, access_token.getAccess_token(), post_id, text.getMessage()));
 	}
 	
 	public HttpRequest publishPhoto(Photo photo, ResponseHandler handler){
@@ -50,7 +50,7 @@ public class PageManager{
 			logger.info("can not find wall_album");
 			return null;
 		}
-		return RequestFactory.publishPhotoRequest(handler, access_token.getAccess_token(), wall_album.getId(), photo.getMedia(), photo.getMessage());
+		return FacebookSession.execute(RequestFactory.publishPhotoRequest(handler, access_token.getAccess_token(), wall_album.getId(), photo.getMedia(), photo.getMessage()));
 	}
 	
 	public HttpRequest publishVedio(Vedio vedio, ResponseHandler handler){
@@ -58,7 +58,7 @@ public class PageManager{
 			logger.info("vedio can not be null");
 			return null;
 		}
-		return RequestFactory.publishVideoRequest(handler, access_token.getAccess_token(), page_id, vedio.getMedia(), vedio.getTitle(), vedio.getDescription());
+		return FacebookSession.execute(RequestFactory.publishVideoRequest(handler, access_token.getAccess_token(), page_id, vedio.getMedia(), vedio.getTitle(), vedio.getDescription()));
 	}
 
 	public String getPage_id() {

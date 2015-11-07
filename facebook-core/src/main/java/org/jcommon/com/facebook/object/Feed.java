@@ -2,6 +2,8 @@ package org.jcommon.com.facebook.object;
 
 import java.util.List;
 
+import org.jcommon.com.facebook.utils.FeedType;
+
 
 public class Feed extends JsonObject {
 	private Comment comments;
@@ -19,10 +21,16 @@ public class Feed extends JsonObject {
 	private String link;
 	private String icon;
 	private String status_type;
+	private String description;
 	private String object_id;
 	
+	public Feed(String json, boolean decode) {
+		super(json,decode);
+		// TODO Auto-generated constructor stub
+	}
+	
 	public Feed(String json) {
-		super(json);
+		super(json,true);
 		// TODO Auto-generated constructor stub
 	}
 
@@ -76,6 +84,10 @@ public class Feed extends JsonObject {
 
 	public String getType() {
 		return type;
+	}
+	
+	public FeedType getFeedType(){
+		return FeedType.getType(type);
 	}
 
 	public void setType(String type) {
@@ -158,5 +170,13 @@ public class Feed extends JsonObject {
 		if(comments!=null && comments.getData()!=null)
 			return comments.getData();
 		return null;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String getDescription() {
+		return description;
 	}
 }

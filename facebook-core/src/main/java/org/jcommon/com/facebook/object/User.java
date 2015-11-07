@@ -10,9 +10,15 @@ public class User extends Profile {
 	private String locale;
 	private String languages;
 	private Picture picture;
+	private String email;
+	
+	public User(String json, boolean decode) {
+		super(json,decode);
+		// TODO Auto-generated constructor stub
+	}
 	
 	public User(String json) {
-		super(json);
+		super(json,true);
 		// TODO Auto-generated constructor stub
 	}
 
@@ -76,5 +82,13 @@ public class User extends Profile {
 
 	public void setPicture(Picture picture) {
 		this.picture = picture;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public String getEmail() {
+		return email;
 	}
 }

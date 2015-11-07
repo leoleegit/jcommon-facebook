@@ -12,8 +12,13 @@ public class FeedUpdate extends JsonObject{
 	private String id;
 	private CommentUpdate comments;
 	
+	public FeedUpdate(String json, boolean decode) {
+		super(json,decode);
+		// TODO Auto-generated constructor stub
+	}
+	
 	public FeedUpdate(String json) {
-		super(json);
+		super(json,true);
 		// TODO Auto-generated constructor stub
 	}
 
@@ -42,8 +47,12 @@ public class FeedUpdate extends JsonObject{
 	public CommentUpdate getComments() {
 		return comments;
 	}
+	
+	public boolean hasCommentUpdate() {
+		return comments!=null && comments.getData()!=null && comments.getData().size()>0;
+	}
 
-	public void setComment(CommentUpdate comments) {
+	public void setComments(CommentUpdate comments) {
 		this.comments = comments;
 	}
 

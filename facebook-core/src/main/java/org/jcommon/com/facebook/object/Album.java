@@ -18,8 +18,13 @@ public class Album extends JsonObject {
 	private String updated_time;
 	private boolean can_upload;
 	  
+	public Album(String json, boolean decode) {
+		super(json,decode);
+		// TODO Auto-generated constructor stub
+	}
+	
 	public Album(String json) {
-		super(json);
+		super(json,true);
 		// TODO Auto-generated constructor stub
 	}
 

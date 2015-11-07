@@ -18,8 +18,8 @@ public class Page extends JsonObject {
 	private int likes;
 	private Cover cover;
 	  
-	public Page(String json) {
-		super(json);
+	public Page(String json, boolean decode) {
+		super(json,decode);
 		// TODO Auto-generated constructor stub
 	}
 

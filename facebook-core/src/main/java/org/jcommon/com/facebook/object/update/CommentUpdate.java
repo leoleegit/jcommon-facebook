@@ -10,8 +10,13 @@ public class CommentUpdate extends JsonObject{
 	private Long created_time;
 	private String id;
 	
+	public CommentUpdate(String json, boolean decode) {
+		super(json, decode);
+		// TODO Auto-generated constructor stub
+	}
+	
 	public CommentUpdate(String json) {
-		super(json);
+		super(json, true);
 		// TODO Auto-generated constructor stub
 	}
 

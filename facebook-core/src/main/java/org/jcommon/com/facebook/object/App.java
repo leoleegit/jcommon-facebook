@@ -7,12 +7,26 @@ public class App extends JsonObject {
 	private String app_secret;
 	private String app_link;
 	private Permission[] permissions;
+	private String permission_str;
 	private String access_token;
 	private String verify_token = "jcommon-facebook";
 	
-	public App(String json) {
-		super(json);
+	public App(String json, boolean decode) {
+		super(json,decode);
 		// TODO Auto-generated constructor stub
+	}
+	
+	public App(String api_id, String app_secret, String verify_token) {
+		super(null,true);
+		// TODO Auto-generated constructor stub
+		setApi_id(api_id);
+		setApp_secret(app_secret);
+		if(verify_token!=null && !"".equals(verify_token.trim()))
+			setVerify_token(verify_token);
+	}
+	
+	public App(String api_id, String app_secret) {
+		this(api_id,app_secret,null);
 	}
 
 	public String getApi_id() {
@@ -64,6 +78,7 @@ public class App extends JsonObject {
 	}
 	
 	public String getPermissionsStr(){
+		if(getPermission_str()!=null)return getPermission_str();
 		StringBuilder sb = new StringBuilder();
 	    for (Permission p : permissions) {
 	        sb.append(p.toString()).append(",");
@@ -71,7 +86,8 @@ public class App extends JsonObject {
 
 	    if ((sb.lastIndexOf(",") == sb.length() - 1) && (sb.length() > 0))
 	        sb.deleteCharAt(sb.length() - 1);
-	    return sb.toString();
+	    setPermission_str(sb.toString());
+	    return getPermission_str();
 	}
 	
 	public boolean appVerify(String hub_challenge,String hub_verify_token,String hub_mode){
@@ -79,4 +95,12 @@ public class App extends JsonObject {
 		  return true;
 	    return false;
     }
+
+	public String getPermission_str() {
+		return permission_str;
+	}
+
+	public void setPermission_str(String permission_str) {
+		this.permission_str = permission_str;
+	}
 }

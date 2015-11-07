@@ -5,13 +5,19 @@ import java.util.List;
 
 public class Comment extends JsonObject {
 	private List<Comment> data;
+	private Comment comments;
 	private String id;
 	private String message;
 	private long created_time;
 	private User from;
 	
+	public Comment(String json, boolean decode) {
+		super(json,decode);
+		// TODO Auto-generated constructor stub
+	}
+	
 	public Comment(String json) {
-		super(json);
+		super(json,true);
 		// TODO Auto-generated constructor stub
 	}
 
@@ -67,5 +73,13 @@ public class Comment extends JsonObject {
 				}
 			}
 		}
+	}
+
+	public void setComments(Comment comments) {
+		this.comments = comments;
+	}
+
+	public Comment getComments() {
+		return comments;
 	}
 }

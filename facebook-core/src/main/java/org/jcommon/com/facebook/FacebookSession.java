@@ -14,6 +14,7 @@ import org.jcommon.com.facebook.object.Feed;
 import org.jcommon.com.facebook.update.FeedMonitor;
 import org.jcommon.com.facebook.update.FeedMonitorListener;
 import org.jcommon.com.facebook.utils.FacebookType;
+import org.jcommon.com.util.http.HttpRequest;
 
 public class FacebookSession implements FeedMonitorListener{
 	protected Logger logger = Logger.getLogger(getClass());
@@ -39,6 +40,9 @@ public class FacebookSession implements FeedMonitorListener{
 		setAlbumManager(new AlbumManager(this));
 		setPageManager(new PageManager(this));
 		setFeedMonitor(new FeedMonitor(facebook_id,access_token,this));
+		
+		logger.info(String.format("FeedMonitorEnable is %s", FacebookManager.instance().getFacebookConfig().isFeedMonitorEnable()));
+		FacebookManager.instance().putFacebookSession(this);
 	}
 	
 	public FacebookSession(FacebookSessionListener listener, String facebook_id,String access_token,FacebookType type){
@@ -48,7 +52,8 @@ public class FacebookSession implements FeedMonitorListener{
 	
 	public void startup(){
 		logger.info(facebook_id);
-		if(feedMonitor!=null && FacebookType.page == type)
+		
+		if(FacebookManager.instance().getFacebookConfig().isFeedMonitorEnable() && feedMonitor!=null && FacebookType.page == type)
 			feedMonitor.startup();
 		if(albumManager!=null)
 			albumManager.getAlbums();
@@ -58,12 +63,14 @@ public class FacebookSession implements FeedMonitorListener{
 		logger.info(facebook_id);
 		if(feedMonitor!=null && FacebookType.page == type)
 			feedMonitor.shutdown();
+		
+		FacebookManager.instance().removeFacebookSession(this);
 	}
 	
 	@Override
 	public void onFeed(Feed feed) {
 		// TODO Auto-generated method stub
-		logger.info(String.format("new feed %s coming", feed.getId()));
+		logger.info(String.format("new feed %s", feed.getId()));
 		if(listener!=null){
 			listener.onFeed(feed);
 		}
@@ -72,12 +79,17 @@ public class FacebookSession implements FeedMonitorListener{
 	@Override
 	public void onComment(Feed feed, List<Comment> comments) {
 		// TODO Auto-generated method stub
-		logger.info(String.format("feed %s get update comment size : ", feed.getId(), comments.size()));
+		logger.info(String.format("feed %s get update comment size : %s", feed.getId(), comments.size()));
 		if(listener!=null){
 			for(Comment comment : comments){
 				listener.onComment(feed, comment);
 			}
 		}
+	}
+	
+	public HttpRequest deleteNote(String note_id, ResponseHandler handler){
+		logger.info(note_id);
+		return execute(RequestFactory.deleteRequest(handler, note_id, access_token.getAccess_token()));
 	}
 
 	public String getFacebook_id() {
@@ -166,5 +178,10 @@ public class FacebookSession implements FeedMonitorListener{
 		if(properties.containsKey(key))
 			return (String) properties.remove(key);
 		return null;
+	}
+	
+	public static HttpRequest execute(HttpRequest request){
+		org.jcommon.com.util.thread.ThreadManager.instance().execute(request);
+		return request;
 	}
 }
