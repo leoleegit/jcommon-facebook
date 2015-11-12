@@ -1,17 +1,18 @@
 package org.jcommon.com.facebook.object;
 
+
 public class UrlObject extends JsonObject{
 	
 	private String url;
 	public UrlObject(String url, boolean decode){
 		super(url,decode);
-		if(url==null)
+		if(this.url==null)
 			this.url = url;
 	}
 	
 	public UrlObject(String url){
 		super(url,true);
-		if(url==null)
+		if(this.url==null)
 			this.url = url;
 	}
 	

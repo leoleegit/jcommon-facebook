@@ -118,12 +118,15 @@ public class MessageMonitor extends ResponseHandler{
 		switch(type){
 			case message_request:{
 				messageHandler(paramHttpRequest,paramObject);
+				break;
 			}
 			case message_detail_request:{
 				conversationHandler(paramHttpRequest,paramObject);
+				break;
 			}
 			default:{
-				logger.warn("unknow type");
+				logger.warn("unknow type : "+type);
+				break;
 			}
 		}
 	}

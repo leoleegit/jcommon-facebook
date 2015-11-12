@@ -6,11 +6,12 @@ import java.util.List;
 public class Message extends JsonObject {
 	private List<Message> data;
 	private Conversation conversation;
+	private Attachments attachments;
 	private long created_time;
 	private String id;
 	private User from;
 	private String message;
-	private List<User> to;
+	private User to;
 	
 	public Message(String json, boolean decode) {
 		super(json, decode);
@@ -31,14 +32,6 @@ public class Message extends JsonObject {
 				data = new ArrayList<Message>();
 				for(Object cu : list){
 					data.add((Message)cu);
-				}
-			}
-		}else if("to".equals(arg0)){
-			List<Object> list = super.json2Objects(User.class, (String) arg1);
-			if(list!=null && list.size()>0){
-				to = new ArrayList<User>();
-				for(Object cu : list){
-					to.add((User)cu);
 				}
 			}
 		}
@@ -92,11 +85,19 @@ public class Message extends JsonObject {
 		this.message = message;
 	}
 
-	public List<User> getTo() {
+	public void setTo(User to) {
+		this.to = to;
+	}
+
+	public User getTo() {
 		return to;
 	}
 
-	public void setTo(List<User> to) {
-		this.to = to;
+	public void setAttachments(Attachments attachments) {
+		this.attachments = attachments;
+	}
+
+	public Attachments getAttachments() {
+		return attachments;
 	}
 }

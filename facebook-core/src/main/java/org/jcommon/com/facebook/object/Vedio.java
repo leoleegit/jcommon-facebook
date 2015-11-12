@@ -17,7 +17,7 @@ public class Vedio extends Media{
 		super(null,true);
 		setTitle(title);
 		setDescription(description);
-		setUrl(url);
+		initMedia(url);
 	}
 
 	public String getTitle() {

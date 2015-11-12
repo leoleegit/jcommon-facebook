@@ -14,6 +14,7 @@ import org.jcommon.com.facebook.object.Comment;
 import org.jcommon.com.facebook.object.Conversation;
 import org.jcommon.com.facebook.object.Feed;
 import org.jcommon.com.facebook.object.Message;
+import org.jcommon.com.facebook.object.User;
 import org.jcommon.com.facebook.update.FeedMonitor;
 import org.jcommon.com.facebook.update.FeedMonitorListener;
 import org.jcommon.com.facebook.update.MessageMonitor;
@@ -23,6 +24,8 @@ import org.jcommon.com.util.http.HttpRequest;
 
 public class FacebookSession implements FeedMonitorListener, MessageMonitorListener{
 	protected Logger logger = Logger.getLogger(getClass());
+	
+	private User aboutme;
 	
 	private String facebook_id;
 	private AccessToken access_token;
@@ -68,6 +71,11 @@ public class FacebookSession implements FeedMonitorListener, MessageMonitorListe
 			messageMonitor.startup();
 		if(albumManager!=null)
 			albumManager.getAlbums();
+		
+		if(FacebookType.page == type)
+			setAboutme(AppManager.aboutMe(facebook_id,getAccess_token()));
+		if(FacebookType.user == type)
+			setAboutme(AppManager.aboutMe(getAccess_token()));
 	}
 	
 	public void shutdown(){
@@ -222,5 +230,13 @@ public class FacebookSession implements FeedMonitorListener, MessageMonitorListe
 
 	public void setMessageManager(MessageManager messageManager) {
 		this.messageManager = messageManager;
+	}
+
+	public void setAboutme(User aboutme) {
+		this.aboutme = aboutme;
+	}
+
+	public User aboutMe() {
+		return aboutme;
 	}
 }

@@ -22,6 +22,24 @@ public class Media extends JsonObject{
 		super(json,true);
 		// TODO Auto-generated constructor stub
 	}
+	
+	public void initMedia(String url){
+		this.url = url;
+		if(url!=null){
+			Media media = MediaManager.instance().getMedia_factory().getMediaFromUrl(url);
+			if(media!=null){
+				if(media.getMedia()!=null){
+					setMedia(media.getMedia());
+				}
+				if(media.getMedia_name()!=null){
+					setMedia_name(media.getMedia_name());
+				}
+				if(media.getContent_type()!=null){
+					setContent_type(media.getContent_type());
+				}
+			}
+		}
+	}
 
 	public String getMedia_id() {
 		return media_id;
@@ -45,20 +63,6 @@ public class Media extends JsonObject{
 
 	public void setUrl(String url) {
 		this.url = url;
-		if(url!=null){
-			Media media = MediaManager.instance().getMedia_factory().getMediaFromUrl(url);
-			if(media!=null){
-				if(media.getMedia()!=null){
-					setMedia(media.getMedia());
-				}
-				if(media.getMedia_name()!=null){
-					setMedia_name(media.getMedia_name());
-				}
-				if(media.getContent_type()!=null){
-					setContent_type(media.getContent_type());
-				}
-			}
-		}
 	}
 
 	public String getName() {

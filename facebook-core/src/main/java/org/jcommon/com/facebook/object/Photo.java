@@ -14,7 +14,7 @@ public class Photo extends Media{
 	public Photo(String message, String url){
 		super(null,true);
 		setMessage(message);
-		setUrl(url);
+		initMedia(url);
 	}
 
 	public String getMessage() {

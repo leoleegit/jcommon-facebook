@@ -9,6 +9,11 @@ public class Link extends JsonObject {
 		// TODO Auto-generated constructor stub
 	}
 
+	public Link(String json) {
+		super(json,true);
+		// TODO Auto-generated constructor stub
+	}
+	
 	public String getName() {
 		return name;
 	}

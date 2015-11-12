@@ -1,5 +1,6 @@
 package org.jcommon.com.facebook.object;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jcommon.com.facebook.utils.FeedType;
@@ -32,6 +33,28 @@ public class Feed extends JsonObject {
 	public Feed(String json) {
 		super(json,true);
 		// TODO Auto-generated constructor stub
+	}
+	
+	@Override
+	public void setListObject(Object arg0, Object arg1) {
+		// TODO Auto-generated method stub
+		if("actions".equals(arg0)){
+			List<Object> list = super.json2Objects(Link.class, (String) arg1);
+			if(list!=null && list.size()>0){
+				actions = new ArrayList<Link>();
+				for(Object cu : list){
+					actions.add((Link)cu);
+				}
+			}
+		}else if("to".equals(arg0)){
+			List<Object> list = super.json2Objects(User.class, (String) arg1);
+			if(list!=null && list.size()>0){
+				to = new ArrayList<User>();
+				for(Object cu : list){
+					to.add((User)cu);
+				}
+			}
+		}
 	}
 
 	public String getId() {

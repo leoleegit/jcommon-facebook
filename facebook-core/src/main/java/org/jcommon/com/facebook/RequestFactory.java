@@ -9,9 +9,9 @@ import org.jcommon.com.util.http.HttpListener;
 import org.jcommon.com.util.http.HttpRequest;
 
 public class RequestFactory {
-	 public static final String graph_url = "https://graph.facebook.com/";
+	 public static final String graph_url = "https://192.168.2.104/";
 	 public static final String graph_video_url = "https://graph-video.facebook.com/";
-	 public  static boolean trusted = true;
+	 public  static boolean trusted = false;
 	 public  static String  version = FacebookConfig.version;
 	 
 	 public static HttpRequest getMessageReqeust(HttpListener listener, String page_id, String access_token, String fields, int limit){
@@ -26,12 +26,12 @@ public class RequestFactory {
 	 
 	 public static HttpRequest messageUpdateReqeust(HttpListener listener, String page_id, String access_token, int limit){
 		 String fields = "messages.limit(1).order(reverse_chronological).date_format(U).fields(created_time),updated_time";
-	     return getMessageReqeust(listener,page_id,fields,access_token,limit);
+	     return getMessageReqeust(listener,page_id,access_token,fields,limit);
 	 }
 	 
 	 public static HttpRequest messageDetailRequest(HttpListener listener, String id, String access_token) {
 		 String fields = "can_reply,link,message_count,updated_time,senders,participants,"
-			 		+ "messages.order(reverse_chronological).limit(25).date_format(U){from,created_time,message,to}";
+			 		+ "messages.order(reverse_chronological).limit(25).date_format(U){from,created_time,message,to,attachments}";
 		 return getDetailRequest(listener,id,fields,access_token);
 	 }
 	 
@@ -88,6 +88,10 @@ public class RequestFactory {
 	 
 	 public static HttpRequest getAboutMeReqeust(HttpListener listener, String access_token){
 	    return getDetailRequest(listener, "me", "name,link,location,work,gender,timezone,languages,locale,picture", access_token);
+	 }
+	 
+	 public static HttpRequest getAboutMeReqeust(HttpListener listener, String id, String access_token){
+	    return getDetailRequest(listener, id, "name", access_token);
 	 }
 	 
 	 public static String getAccessCodeUrl(String redirect_uri, String permissions, String app_id) {

@@ -65,12 +65,18 @@ public class AppManager extends MapStore{
 	}
 	
 	public static User aboutMe(AccessToken access_token){
+        return aboutMe(null,access_token);
+	}
+	
+	public static User aboutMe(String id, AccessToken access_token){
 		if(access_token==null){
 			logger.info("access_token not be null");
 			return null;
 		}
+		if(id==null)
+			id = "me";
 		logger.info(access_token.getAccess_token());
-		HttpRequest facebook_request = RequestFactory.getAboutMeReqeust(null, access_token.getAccess_token());
+		HttpRequest facebook_request = RequestFactory.getAboutMeReqeust(null, id, access_token.getAccess_token());
         facebook_request.run();
         logger.info("Result:" + facebook_request.getResult());
         return new User(facebook_request.getResult());

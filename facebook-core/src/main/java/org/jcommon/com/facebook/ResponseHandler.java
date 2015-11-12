@@ -4,6 +4,7 @@ import java.util.*;
 
 import org.apache.log4j.Logger;
 import org.jcommon.com.util.JsonUtils;
+import org.jcommon.com.util.collections.MapStore;
 import org.jcommon.com.util.http.HttpListener;
 import org.jcommon.com.util.http.HttpRequest;
 import org.jcommon.com.facebook.config.FacebookConfig;
@@ -13,7 +14,7 @@ import org.jcommon.com.facebook.object.JsonObject;
 import org.jcommon.com.facebook.object.ObjectFactory;
 import org.json.JSONObject;
 
-public abstract class ResponseHandler implements HttpListener{
+public abstract class ResponseHandler extends MapStore implements HttpListener{
 	private Map<HttpRequest,Class<? extends JsonObject>> responseObjects = new HashMap<HttpRequest,Class<? extends JsonObject>>();
 	protected static Logger logger = Logger.getLogger(ResponseHandler.class);
 	

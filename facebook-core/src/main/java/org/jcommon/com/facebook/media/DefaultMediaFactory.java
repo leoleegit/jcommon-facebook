@@ -12,7 +12,7 @@ public class DefaultMediaFactory extends MediaFactory{
 	private Logger logger = Logger.getLogger(getClass());
 	private static final String MEDIA_STORE="facebook.media.store";
 	private static final String MEDIA_URL  ="facebook.media.url";
-	private static final String DEFAULT_STORE = System.getProperty("user.dir")+File.separator+"mediastroe";
+	private static final String DEFAULT_STORE = System.getProperty("user.dir")+File.separator+"fb.media";
 	
 	@Override
 	public File createEmptyFile(Media media) {
@@ -52,6 +52,10 @@ public class DefaultMediaFactory extends MediaFactory{
 				File type_dir    = new File(file.getParent(),content_type);
 				if(!type_dir.exists())
 					type_dir.mkdirs();
+				type_dir    = new File(type_dir,media.getMedia_id());
+				if(!type_dir.exists())
+					type_dir.mkdirs();
+				
 				File newfile     = new File(type_dir.getAbsolutePath(),file_name);
 				boolean rename   = file.renameTo(newfile);
 				if(rename)
@@ -60,7 +64,7 @@ public class DefaultMediaFactory extends MediaFactory{
 				// TODO Auto-generated catch block
 				logger.error("", e);
 			}
-			url = url + content_type + "/" +file_name;
+			url = url + content_type + "/" + media.getMedia_id() + "/" +file_name;
 			media.setUrl(url);
 		}
 		
@@ -75,16 +79,23 @@ public class DefaultMediaFactory extends MediaFactory{
 			String store = System.getProperty(MEDIA_STORE, DEFAULT_STORE);
 			String url_start =  "/";
 			url              = url.substring(url.indexOf(url_start)+url_start.length());
+			String[] urls    = url.split("/");
 			
-			String content_type = url.substring(0,url.indexOf("/"));
-			String file_name    = url.substring(url.indexOf(content_type)+content_type.length()+1);
+			String content_type = urls[0];
+			String media_id     = urls[1];
+			String file_name    = urls[2];
 			
 			File type_dir    = new File(store,content_type);
 			ContentType type = ContentType.getContentByType(content_type, true);
-			logger.info(String.format("store:%s;file_name:%s;content_type:%s", store,file_name,type.type));
+			logger.info(String.format("store:%s;file_name:%s;media_id:%s;content_type:%s", store,file_name,media_id,type.type));
 			
 			if(!type_dir.exists())
 				return media;
+			
+			type_dir    = new File(type_dir,media_id);
+			if(!type_dir.exists())
+				return media;
+			
 			File file        = new File(type_dir.getAbsolutePath(),file_name);
 			media.setMedia(file);
 			media.setMedia_name(file_name.indexOf(".")!=-1?file_name:file_name+type.name);

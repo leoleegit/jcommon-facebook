@@ -40,6 +40,23 @@ public class FacebookManager extends Monitor{
 		instance = this;
 	}
 	
+	public void startup(){
+		super.startup();
+		logger.info("FacebookManager");
+	}
+	
+	public void shutdown(){
+		super.shutdown();
+		logger.info("FacebookManager");
+		
+		@SuppressWarnings("unchecked")
+		Map<String, FacebookSession> _copy = (HashMap<String, FacebookSession>) ((HashMap<String, FacebookSession>) facebookSessions).clone();
+		for(FacebookSession session : _copy.values())
+			session.shutdown();
+		facebookSessions.clear();
+		_copy.clear();
+	}
+	
 	@Override
 	public void initOperation(){
 		 addOperation(new MBeanOperationInfo("addApp", "add or update app", new MBeanParameterInfo[] { 
@@ -134,6 +151,12 @@ public class FacebookManager extends Monitor{
 			}
 		}
 		return list;
+	}
+	
+	public boolean FacebookSessionExist(String facebook_id){
+		if(facebook_id!=null)
+			return facebookSessions.containsKey(facebook_id);
+		return false;
 	}
 	
 	public FacebookSession getDefaultFacebookSessions(FacebookType type){

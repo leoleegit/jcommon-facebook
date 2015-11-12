@@ -1,5 +1,6 @@
 package org.jcommon.com.facebook.test;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
@@ -8,6 +9,7 @@ import org.apache.log4j.xml.DOMConfigurator;
 import org.jcommon.com.facebook.FacebookManager;
 import org.jcommon.com.facebook.FacebookSession;
 import org.jcommon.com.facebook.FacebookSessionListener;
+import org.jcommon.com.facebook.MediaManager;
 import org.jcommon.com.facebook.ResponseHandler;
 import org.jcommon.com.facebook.manager.MessageManager;
 import org.jcommon.com.facebook.manager.PageManager;
@@ -16,12 +18,15 @@ import org.jcommon.com.facebook.object.Conversation;
 import org.jcommon.com.facebook.object.Error;
 import org.jcommon.com.facebook.object.Feed;
 import org.jcommon.com.facebook.object.JsonObject;
+import org.jcommon.com.facebook.object.Media;
 import org.jcommon.com.facebook.object.Message;
 import org.jcommon.com.facebook.object.Photo;
 import org.jcommon.com.facebook.object.Text;
 import org.jcommon.com.facebook.object.UrlObject;
 import org.jcommon.com.facebook.object.Vedio;
 import org.jcommon.com.facebook.utils.FacebookType;
+import org.jcommon.com.facebook.utils.FeedType;
+import org.jcommon.com.util.http.ContentType;
 import org.jcommon.com.util.http.HttpRequest;
 import org.jcommon.com.util.system.SystemListener;
 
@@ -41,27 +46,50 @@ public class PageManagerTester extends ResponseHandler implements FacebookSessio
 	 * @throws InterruptedException 
 	 */
 	public static void main(String[] args) throws InterruptedException {
+//		String file_name     =  "图片1.jpg";
+//		String file_id       = org.jcommon.com.util.BufferUtils.generateRandom(20);
+//		String content_type  = ContentType.png.name;
+//		
+//		Media media = new Media(null);
+//		media.setContent_type(content_type);
+//		media.setMedia_id(file_id);
+//		media.setMedia_name(file_name);
+//		
+//		java.io.File file  = MediaManager.instance().getMedia_factory().createEmptyFile(media);
+//		try {
+//			file.createNewFile();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		media.setMedia(file);
+//		
+//		String url = MediaManager.instance().getMedia_factory().createUrl(media).getUrl();
+//		logger.info(url);
+//		UrlObject obj = new UrlObject(url);
+//		logger.info(new Photo("", obj.getUrl()).getMedia());
+		
 		// TODO Auto-generated method stub
-		FacebookManager.instance().getFacebookConfig().setDebug(true);
-		FacebookManager.instance().getFacebookConfig().setFeedMonitorEnable(false);
-		FacebookManager.instance().getFacebookConfig().setMessageMonitorEnable(false);
-		FacebookManager.instance().getFacebookConfig().setStart_time(0L);
-		FacebookManager.instance().getFacebookConfig().setFeed_monitor_lenght(5);
+		//FacebookManager.instance().getFacebookConfig().setDebug(true);
+		//FacebookManager.instance().getFacebookConfig().setFeedMonitorEnable(false);
+		//FacebookManager.instance().getFacebookConfig().setMessageMonitorEnable(false);
+		//FacebookManager.instance().getFacebookConfig().setStart_time(0L);
+		//FacebookManager.instance().getFacebookConfig().setFeed_monitor_lenght(5);
 		
 		new PageManagerTester().startup();
-		Thread.sleep(11000L);
+		//Thread.sleep(11000L);
 		//postText(session.getPageManager());
 		//postPhoto(session.getPageManager());
 		//postVedio(session.getPageManager());
 		
-		postMessage(session.getMessageManager());
+		//postMessage(session.getMessageManager());
 		
 //		String data = "{\"object\":\"page\",\"entry\":[{\"id\":\"271039552948235\",\"time\":1446829106,\"changes\":[{\"field\":\"feed\",\"value\":{\"item\":\"comment\",\"verb\":\"add\",\"comment_id\":\"928837367168447_1065235330195316\",\"post_id\":\"271039552948235_1065271373525045\",\"parent_id\":\"271039552948235_928837383835112\",\"sender_id\":271039552948235,\"created_time\":1446829106,\"message\":\"hi men\",\"sender_name\":\"Newton\"}}]}]}";
 //		FacebookManager.instance().onCallback(data);
 	}
 	
 	public static void postMessage(MessageManager page){
-		String conversation_id = "";
+		String conversation_id = "t_id.312177318835636";
 		page.sendMessage(conversation_id, new Text("hello text!"), listener);
 	}
 	
@@ -95,8 +123,10 @@ public class PageManagerTester extends ResponseHandler implements FacebookSessio
 	public void onFeed(Feed feed) {
 		// TODO Auto-generated method stub
 		logger.info(String.format("new feed (type:%s) : %s ",feed.getFeedType(), feed.toJson()));
-		//logger.info(feed.getPicture());
-		//logger.info(feed.getLink());
+		if(feed.getFeedType()==FeedType.photo)
+			logger.info(feed.getPicture());
+		logger.info(feed.getLink());
+		logger.info(feed.getActions());
 	}
 	
 	@Override

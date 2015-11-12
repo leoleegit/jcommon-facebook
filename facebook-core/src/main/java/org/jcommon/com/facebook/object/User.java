@@ -1,8 +1,10 @@
 package org.jcommon.com.facebook.object;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class User extends Profile {
+	private List<User> data;
 	private String category;
 	private String link;
 	private String gender;
@@ -10,11 +12,25 @@ public class User extends Profile {
 	private String locale;
 	private String languages;
 	private Picture picture;
-	private String email;
+	private String  email;
 	
 	public User(String json, boolean decode) {
 		super(json,decode);
 		// TODO Auto-generated constructor stub
+	}
+	
+	@Override
+	public void setListObject(Object arg0, Object arg1) {
+		// TODO Auto-generated method stub
+		if("data".equals(arg0)){
+			List<Object> list = super.json2Objects(getClass(), (String) arg1);
+			if(list!=null && list.size()>0){
+				data = new ArrayList<User>();
+				for(Object cu : list){
+					data.add((User)cu);
+				}
+			}
+		}
 	}
 	
 	public User(String json) {
@@ -90,5 +106,13 @@ public class User extends Profile {
 
 	public String getEmail() {
 		return email;
+	}
+
+	public void setData(List<User> data) {
+		this.data = data;
+	}
+
+	public List<User> getData() {
+		return data;
 	}
 }

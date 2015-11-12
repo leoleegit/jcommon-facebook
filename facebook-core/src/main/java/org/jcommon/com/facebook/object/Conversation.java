@@ -1,7 +1,5 @@
 package org.jcommon.com.facebook.object;
 
-import java.util.ArrayList;
-import java.util.List;
 
 public class Conversation extends JsonObject {
 	private Long updated_time;
@@ -10,8 +8,8 @@ public class Conversation extends JsonObject {
 	private boolean can_reply;
 	private int message_count;
 	private Message messages;
-	private List<User> senders;
-	private List<User> participants;
+	private User senders;
+	private User participants;
 	
 	public Conversation(String json, boolean decode) {
 		super(json, decode);
@@ -21,28 +19,6 @@ public class Conversation extends JsonObject {
 	public Conversation(String json) {
 		super(json, true);
 		// TODO Auto-generated constructor stub
-	}
-	
-	@Override
-	public void setListObject(Object arg0, Object arg1) {
-		// TODO Auto-generated method stub
-		if("senders".equals(arg0)){
-			List<Object> list = super.json2Objects(User.class, (String) arg1);
-			if(list!=null && list.size()>0){
-				senders = new ArrayList<User>();
-				for(Object cu : list){
-					senders.add((User)cu);
-				}
-			}
-		}else if("participants".equals(arg0)){
-			List<Object> list = super.json2Objects(User.class, (String) arg1);
-			if(list!=null && list.size()>0){
-				participants = new ArrayList<User>();
-				for(Object cu : list){
-					participants.add((User)cu);
-				}
-			}
-		}
 	}
 
 	public Long getUpdated_time() {
@@ -93,20 +69,19 @@ public class Conversation extends JsonObject {
 		this.messages = messages;
 	}
 
-	public List<User> getSenders() {
-		return senders;
-	}
-
-	public void setSenders(List<User> senders) {
+	public void setSenders(User senders) {
 		this.senders = senders;
 	}
 
-	public List<User> getParticipants() {
-		return participants;
+	public User getSenders() {
+		return senders;
 	}
 
-	public void setParticipants(List<User> participants) {
+	public void setParticipants(User participants) {
 		this.participants = participants;
 	}
-	
+
+	public User getParticipants() {
+		return participants;
+	}
 }

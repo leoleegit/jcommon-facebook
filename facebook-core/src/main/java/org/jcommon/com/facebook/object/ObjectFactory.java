@@ -41,9 +41,9 @@ public class ObjectFactory {
 	
 	public static JsonObject newInstance(Class<? extends JsonObject> class_, String args) {
 		try {
-			Class<?>[] par = { String.class };
+			Class<?>[] par = { String.class, boolean.class };
 			Constructor<? extends JsonObject> con = class_.getConstructor(par);
-			Object[] objs = { args };
+			Object[] objs = { args, true };
 	        return con.newInstance(objs);
 		}
 		catch (SecurityException e) {
