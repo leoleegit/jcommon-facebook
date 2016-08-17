@@ -9,9 +9,9 @@ import org.jcommon.com.util.http.HttpListener;
 import org.jcommon.com.util.http.HttpRequest;
 
 public class RequestFactory {
-	 public static final String graph_url = "https://192.168.2.104/";
+	 public static final String graph_url = "https://graph.facebook.com/";
 	 public static final String graph_video_url = "https://graph-video.facebook.com/";
-	 public  static boolean trusted = false;
+	 public  static boolean trusted = true;
 	 public  static String  version = FacebookConfig.version;
 	 
 	 public static HttpRequest getMessageReqeust(HttpListener listener, String page_id, String access_token, String fields, int limit){
@@ -106,18 +106,34 @@ public class RequestFactory {
 	     String[] keys = { "client_id", "client_secret", "code", "redirect_uri" };
 	     String[] values = { api_id, app_secret, code, redirect_uri };
 
-	     String url = graph_url + version + "/" + "oauth/access_token";
+	     String url = graph_url + version + "/oauth/access_token";
 	     url = JsonUtils.toRequestURL(url, keys, values);
 	     return new HttpRequest(url, listener, trusted);
 	 }
 	 
 	 public static HttpRequest getAllAccessTokenReqeust(HttpListener listener, String access_token) {
-	     String url = graph_url +"me/accounts";
+	     String url = graph_url + version +"/me/accounts";
 	     String[] keys = { "access_token"};
 	     String[] values = { access_token };
 
 	     url = JsonUtils.toRequestURL(url, keys, values);
 	     return new HttpRequest(url, listener, trusted);
+	 }
+	 
+	 public static HttpRequest getTabsReqeust(HttpListener listener,String page_id,String access_token,String app_id) {
+	     String url = graph_url + version + "/" + page_id + "/tabs";
+	     String[] keys = { "app_id", "access_token", "method"};
+	     String[] values = {app_id, access_token, HttpRequest.GET};
+	     url = JsonUtils.toRequestURL(url, keys, values);
+	     return new HttpRequest(url, listener, trusted);
+	 }
+	 
+	 public static HttpRequest newTabRequest(HttpListener listener,String page_id,String access_token,String app_id){
+		 String url = graph_url + version + "/" + page_id + "/tabs";
+		 String[] keys = { "app_id", "access_token", "method"};
+		 String[] values = {app_id, access_token, HttpRequest.POST};
+		 url = JsonUtils.toRequestURL(url, keys, values);
+	     return publishRequest(listener,url,keys,values);
 	 }
 	 
 	 public static HttpRequest publishFeedRequest(HttpListener listener, String access_token, String id, String message){

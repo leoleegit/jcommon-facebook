@@ -10,7 +10,7 @@ public class User extends Profile {
 	private String gender;
 	private String timezone;
 	private String locale;
-	private String languages;
+	private Languages languages;
 	private Picture picture;
 	private String  email;
 	
@@ -78,11 +78,11 @@ public class User extends Profile {
 		this.locale = locale;
 	}
 
-	public String getLanguages() {
+	public Languages getLanguages() {
 		return languages;
 	}
 
-	public void setLanguages(String languages) {
+	public void setLanguages(Languages languages) {
 		this.languages = languages;
 	}
 

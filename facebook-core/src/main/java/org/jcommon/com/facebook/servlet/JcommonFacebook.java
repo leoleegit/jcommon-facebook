@@ -35,8 +35,9 @@ public class JcommonFacebook extends ResourceServlet{
         String cmd    = request.getParameter("cmd");
         String code   = request.getParameter("code");
         String app_id = request.getParameter("id");
+        String app_name     = request.getParameter("app_name");
         
-        logger.info(String.format("cmd:%s;app id :%s; \n code:%s", cmd,app_id,code));
+        logger.info(String.format("cmd:%s;app id :%s; app_name:%s;\n code:%s", cmd,app_id,app_name,code));
         org.jcommon.com.facebook.object.Error error = new org.jcommon.com.facebook.object.Error(null,true);
         error.setType("jcommonfacebook");
         if(super.isAcessSource(request, files[0])){
@@ -44,7 +45,8 @@ public class JcommonFacebook extends ResourceServlet{
             InputStream is = getClass().getClassLoader().getResourceAsStream(files[0]);
             OutputStream os = response.getOutputStream();
             
-            App app   = app_id!=null?AppManager.instance().getApp(app_id):AppManager.instance().getDefaultApp();
+            org.jcommon.com.facebook.object.App app = app_id!=null?
+    				AppManager.instance().getApp(app_id):AppManager.instance().getAppByName(app_name);
     	  	logger.info(String.format("app:%s,id%s", app,app_id));
     	  	if(app==null){
     	  		error.setMessage("//can't find facebook app");
@@ -83,7 +85,8 @@ public class JcommonFacebook extends ResourceServlet{
         redirect_uri = redirect_uri==null?getRequestURL(request):redirect_uri;
 	  	logger.info(String.format("redirect_uri:%s \ncode:%s", redirect_uri,code));
 	  	
-        App app   = app_id!=null?AppManager.instance().getApp(app_id):AppManager.instance().getDefaultApp();
+	  	org.jcommon.com.facebook.object.App app = app_id!=null?
+				AppManager.instance().getApp(app_id):AppManager.instance().getAppByName(app_name);
 	  	logger.info(String.format("app:%s,id%s", app,app_id));
 	  	
 	  	if(app==null){

@@ -2,17 +2,61 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<script type="text/javascript" src="./jquery-min-1.11.0.js"></script>
 <title>Generate Access Token</title>
  <script type="text/javascript">
+//string
+String.prototype.startWith=function(str){
+	if(str==null||str==""||this.length==0||str.length>this.length)
+	  return false;
+	if(this.substr(0,str.length)==str)
+	  return true;
+	else
+	  return false;
+};
+ 	
         function helpaction() {
         	document.getElementById('help_id').style.display='';
         }
+        function fire(type){
+        	var app = $("#apps").val(); 
+        	var url = './?all=1&type='+type + '&app_id='+app;
+        	window.open(url)
+        }
+        function getapps(){
+        	$.get('./apps',{},function(apps_json,statusTxt,xhr){
+        		if(statusTxt=="success"){
+        			if(apps_json.startWith('{'))
+        				apps_json = eval('('+apps_json+')');
+        			else if(apps_json.startWith('['))
+        				apps_json = eval(apps_json);
+        			if(apps_json instanceof Array){
+        				for(var i=0;i<apps_json.length;i++){
+        					var option = document.createElement('option');
+        					$(option).attr('value',apps_json[i].app_id);
+        					$(option).html(apps_json[i].app_name);
+        					$("#apps").append(option);
+        				}
+        			}else{
+        				
+        			}
+        		}else{
+        			alert('get facebook apps fail.');
+        		}
+        	});
+        }
+        $(document).ready(function(){
+        	getapps();
+        });
     </script>
 </head>
 <body>
 <h2>Generate Facebook Access Token</h2>
-<a href="javaScript:window.open('./?type=user')">generate user access token</a></br>
-<a href="javaScript:window.open('./?type=page')">generate page access token</a></br>
+<select id="apps">
+</select>
+<hr/>
+<a href="javaScript:fire('user')">generate user access token</a></br>
+<a href="javaScript:fire('page')">generate page access token</a></br>
 <a href="javaScript:helpaction()">help</a>
 <div id="help_id" style="display: none">
 <h4>We recommend that you use chrome with <a href="javaScript:window.open('https://chrome.google.com/webstore/detail/json-formatter/bcjindcccaagfpapjjmafapmmgkkhgoa')">JSON Formatter plugin</a> installed to generate access token.</h4>

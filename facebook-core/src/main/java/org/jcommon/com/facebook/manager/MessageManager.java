@@ -25,7 +25,7 @@ public class MessageManager {
 			logger.info("text can not be null");
 			return null;
 		}
-		return FacebookSession.execute(RequestFactory.publishMessageRequest(handler, access_token.getAccess_token(), conversation_id, text.getMessage()));
+		return session.execute(RequestFactory.publishMessageRequest(handler, access_token.getAccess_token(), conversation_id, text.getMessage()));
 	}
 	
 	public String getFacebook_id() {

@@ -1,5 +1,6 @@
 package org.jcommon.com.facebook.permission;
 
+
 public enum UserPermissionV2_5 implements Permission {
 	user_about_me,
 	
@@ -64,5 +65,9 @@ public enum UserPermissionV2_5 implements Permission {
 		if(str!=null)
 			return str;
 		return super.toString();
+	}
+	
+	public static Permission[] list() {
+	    return UserPermissionV2_5.class.getEnumConstants();
 	}
 }

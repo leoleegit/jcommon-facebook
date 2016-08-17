@@ -24,7 +24,9 @@ import org.jcommon.com.util.http.HttpRequest;
 
 public class FacebookSession implements FeedMonitorListener, MessageMonitorListener{
 	protected Logger logger = Logger.getLogger(getClass());
-	
+	private static long monitor_frequency = FacebookManager.instance().getFacebookConfig().getMessage_monitor_frequency();
+	private static QueueRequestManager queueRequest = new QueueRequestManager(monitor_frequency);
+	private long request_count = 0;
 	private User aboutme;
 	
 	private String facebook_id;
@@ -52,8 +54,9 @@ public class FacebookSession implements FeedMonitorListener, MessageMonitorListe
 		setMessageManager(new MessageManager(this));
 		setFeedMonitor(new FeedMonitor(facebook_id,access_token,this));
 		setMessageMonitor(new MessageMonitor(facebook_id,access_token,this));
-		
-		logger.info(String.format("FeedMonitorEnable is %s", FacebookManager.instance().getFacebookConfig().isFeedMonitorEnable()));
+
+		logger.info(String.format("%s (%s) --> FeedMonitorEnable is %s ; MessageMonitorEnable is %s", facebook_id, type, FacebookManager.instance().getFacebookConfig().isFeedMonitorEnable(),
+				FacebookManager.instance().getFacebookConfig().isMessageMonitorEnable()));
 		FacebookManager.instance().putFacebookSession(this);
 	}
 	
@@ -69,10 +72,10 @@ public class FacebookSession implements FeedMonitorListener, MessageMonitorListe
 			feedMonitor.startup();
 		if(FacebookManager.instance().getFacebookConfig().isMessageMonitorEnable() && messageMonitor!=null && FacebookType.user != type)
 			messageMonitor.startup();
-		if(albumManager!=null)
+		if(albumManager!=null && FacebookType.page == type)
 			albumManager.getAlbums();
 		
-		if(FacebookType.page == type)
+		if(FacebookType.page == type) 
 			setAboutme(AppManager.aboutMe(facebook_id,getAccess_token()));
 		if(FacebookType.user == type)
 			setAboutme(AppManager.aboutMe(getAccess_token()));
@@ -80,10 +83,22 @@ public class FacebookSession implements FeedMonitorListener, MessageMonitorListe
 	
 	public void shutdown(){
 		logger.info(facebook_id);
-		if(feedMonitor!=null && FacebookType.page == type)
+		if(feedMonitor!=null)
 			feedMonitor.shutdown();
-		
+		if(messageMonitor!=null)
+			messageMonitor.shutdown();
 		FacebookManager.instance().removeFacebookSession(this);
+	}
+	
+	public void updateFrequency(long frequency){
+		if(feedMonitor!=null)
+			feedMonitor.updateFrequency(frequency);
+		if(messageMonitor!=null)
+			messageMonitor.updateFrequency(frequency);
+	}
+	
+	public String getStatus(){
+		return String.format("%s --> Monitor(feed:%s;pm:%s);RequestCount(%s)", facebook_id,(feedMonitor!=null?feedMonitor.isRun():false),(messageMonitor!=null?messageMonitor.isRun():false),request_count);
 	}
 	
 	@Override
@@ -211,7 +226,8 @@ public class FacebookSession implements FeedMonitorListener, MessageMonitorListe
 		return null;
 	}
 	
-	public static HttpRequest execute(HttpRequest request){
+	public HttpRequest execute(HttpRequest request){
+		request_count++;
 		org.jcommon.com.util.thread.ThreadManager.instance().execute(request);
 		return request;
 	}
@@ -238,5 +254,13 @@ public class FacebookSession implements FeedMonitorListener, MessageMonitorListe
 
 	public User aboutMe() {
 		return aboutme;
+	}
+
+	public static void setQueueRequest(QueueRequestManager queueRequest) {
+		FacebookSession.queueRequest = queueRequest;
+	}
+
+	public static QueueRequestManager getQueueRequest() {
+		return queueRequest;
 	}
 }

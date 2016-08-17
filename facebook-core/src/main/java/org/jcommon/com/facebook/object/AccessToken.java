@@ -1,18 +1,27 @@
 package org.jcommon.com.facebook.object;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.regex.Pattern;
+
+import org.jcommon.com.util.DateUtils;
 
 public class AccessToken extends JsonObject{
 	private List<AccessToken> data;
 	private String id;
 	private String name;
 	
+	private App app;
+	private User user;
+	private String scopes;
+	
 	private String access_token;
 	private String token_type;
 	private String category;
 	private String perms;
 	private String expired;
+	private String expires_in;
 	  
 	public AccessToken(String json, boolean decode) {
 		super(json,decode);
@@ -32,6 +41,8 @@ public class AccessToken extends JsonObject{
 	}
 
 	public String getId() {
+		if(id==null && getUser()!=null)
+			return getUser().getId();
 		return id;
 	}
 
@@ -107,5 +118,48 @@ public class AccessToken extends JsonObject{
 
 	public String getToken_type() {
 		return token_type;
+	}
+
+	public void setApp(App app) {
+		this.app = app;
+	}
+
+	public App getApp() {
+		return app;
+	}
+
+	public void setScopes(String scopes) {
+		this.scopes = scopes;
+	}
+
+	public String getScopes() {
+		return scopes;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
+
+	public User getUser() {
+		return user;
+	}
+
+	public void setExpires_in(String expires_in) {
+		if(expires_in!=null && isNumeric(expires_in)){
+			long expire = Long.valueOf(expires_in) * 1000l;
+			long now    = new Date().getTime();
+			expires_in  = DateUtils.getNowSinceYear(new Date(now+expire));
+		}
+		this.expires_in = expires_in;
+	}
+
+	public String getExpires_in() {
+		return expires_in==null?"Never":expires_in;
+	}
+	
+	public static boolean isNumeric(String str){ 
+		if(str==null)return false;
+	    Pattern pattern = Pattern.compile("[0-9]*"); 
+	    return pattern.matcher(str).matches();    
 	}
 }

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -38,9 +39,11 @@ public class GetAccessToken extends ResourceServlet{
 	    logger.info("GetAccessToken running ...");
     }
     
-    final String[] files = {"help.PNG","access_token.html"};
+    final String[] files = {"help.PNG","access_token.html","jquery-min-1.11.0.js"};
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 	  	String file_name = null;
+	  	org.jcommon.com.facebook.object.Error error = new org.jcommon.com.facebook.object.Error(null,true);
+	  	error.setType("get_access_token");
 	  	if(super.isAcessSource(request, files[0])){
 	  		response.setContentType("image/jpeg");
 	  		file_name = files[0];
@@ -50,6 +53,21 @@ public class GetAccessToken extends ResourceServlet{
 	  	}else if(super.isAcessSource(request, "ls")){
 	  		response.setContentType("text/html; charset=utf-8");
 	  		file_name = files[1];
+	  	}else if(super.isAcessSource(request, files[2])){
+	  		response.setContentType("text/html; charset=utf-8");
+	  		file_name = files[2];
+	  	}else if(super.isAcessSource(request, "apps")){
+	  		response.setContentType("text/html; charset=utf-8");
+	  		ArrayList<App> apps = (ArrayList<App>) AppManager.instance().getApps();
+	  		String jsons = org.jcommon.com.util.JsonObject.list2Json(apps);
+	  		if(jsons!=null){
+	  			response.getWriter().println(jsons);
+	  			return;
+	  		}else{
+	  			error.setMessage("apps data is null.");
+		  		response.getWriter().println(error.toJson());
+		  		return;
+	  		}
 	  	}
 	  	if(file_name!=null){
 	  		logger.info("file_name:"+file_name);
@@ -75,9 +93,6 @@ public class GetAccessToken extends ResourceServlet{
 	  	App app   = app_id!=null?AppManager.instance().getApp(app_id):AppManager.instance().getDefaultApp();
 	  	logger.info(String.format("app:%s;app_id:%s;all:%s;id:%s", app,app_id,all,token_type));
 	  	
-	  	org.jcommon.com.facebook.object.Error error = new org.jcommon.com.facebook.object.Error(null,true);
-	  	error.setType("get_access_token");
-	  	
 	  	if(app==null){
 	  		error.setMessage("can find facebook app by :"+app_id);
 	  		response.getWriter().println(error.toJson());
@@ -88,6 +103,7 @@ public class GetAccessToken extends ResourceServlet{
 	  	
 	  	if (code == null) {
 	  		String url = AppManager.getAccessCodeUrl(app, redirect_uri);
+	  		logger.info(url);
 	  		response.sendRedirect(url);
 	  	}else{
 	  		AccessToken token = AppManager.getAccessToken(app, redirect_uri, code);

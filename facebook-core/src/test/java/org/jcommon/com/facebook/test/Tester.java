@@ -44,7 +44,7 @@ public class Tester implements SystemListener{
 	public void startup() {
 		// TODO Auto-generated method stub
 		AddTester(new GetAccessTokenTester());
-		AddTester(new PageManagerTester());
+		//AddTester(new PageManagerTester());
 		for(SystemListener sl : tester){
 			sl.startup();
 		}

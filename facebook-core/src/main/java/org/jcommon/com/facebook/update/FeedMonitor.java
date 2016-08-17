@@ -7,6 +7,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import org.jcommon.com.facebook.FacebookManager;
+import org.jcommon.com.facebook.FacebookSession;
 import org.jcommon.com.facebook.RequestFactory;
 import org.jcommon.com.facebook.ResponseHandler;
 import org.jcommon.com.facebook.object.Comment;
@@ -18,7 +19,6 @@ import org.jcommon.com.facebook.utils.FixMap;
 import org.jcommon.com.util.health.Status;
 import org.jcommon.com.util.health.StatusManager;
 import org.jcommon.com.util.http.HttpRequest;
-import org.jcommon.com.util.thread.ThreadManager;
 
 public class FeedMonitor extends ResponseHandler{
 	private int  monitor_lenght    = FacebookManager.instance().getFacebookConfig().getFeed_monitor_lenght();
@@ -35,6 +35,7 @@ public class FeedMonitor extends ResponseHandler{
 	
 	private String facebook_id;
 	private String access_token;
+	private FacebookSession session;
 	private FeedMonitorListener listener;
 	
 	public final String name = "FBAPI";
@@ -42,6 +43,9 @@ public class FeedMonitor extends ResponseHandler{
 	
 	private boolean run;
 	private Timer timer_graph = null;
+	private Timer timer_timeout = null;
+	private long the_last_update = 0;
+	private long current_frequency = 0;
 	
 	private FixMap<String, Long> post_list    = new FixMap<String, Long>(monitor_lenght);
 	private LinkedList<String> comment_cache  = new LinkedList<String>(){
@@ -67,9 +71,11 @@ public class FeedMonitor extends ResponseHandler{
 		}
 	};
 	
-	public FeedMonitor(String facebook_id, String access_token){
+	public FeedMonitor(String facebook_id, String access_token, FacebookSession session){
 		this.setFacebook_id(facebook_id);
 		this.setAccess_token(access_token);
+		this.setListener(session);
+		this.session = session;
 	}
 	
 	public FeedMonitor(String facebook_id, String access_token, FeedMonitorListener listener){
@@ -81,6 +87,27 @@ public class FeedMonitor extends ResponseHandler{
 	public void startup(){
 		logger.info(facebook_id);
 		run = true;
+		start(monitor_frequency * 9);
+	}
+	
+	public void updateFrequency(long frequency){
+		start(frequency);
+	}
+	
+	private void start(long frequency){
+		if(!run)return;
+		if(current_frequency==frequency)
+			return;
+		current_frequency = frequency;
+		if (this.timer_graph != null) {
+	        try {
+		        this.timer_graph.cancel();
+		        this.timer_graph = null;
+	        } catch (Exception e) {
+	    	    logger.error("", e);
+	        }
+	    }
+		logger.info(facebook_id + " Monitor ...");
 		timer_graph =  org.jcommon.com.util.thread.TimerTaskManger.instance().schedule("FeedMonitor-Graph", new TimerTask(){
 	    	public void run(){
 	    		if(!run)return;
@@ -88,14 +115,15 @@ public class FeedMonitor extends ResponseHandler{
 	    	    HttpRequest re = RequestFactory.feedUpdateReqeust(FeedMonitor.this, facebook_id, access_token, monitor_lenght);
 	    	    FeedMonitor.this.addHandlerObject(re, FeedUpdate.class);
 	    	    re.setAttribute(request_type, feed_request);
-	    	    ThreadManager.instance().execute(re);
+	    	    session.execute(re);
 	    	}
-	    }, 5000L, monitor_frequency);
+	    }, frequency, frequency);
 	}
 	
 	public void shutdown() {
 		logger.info(facebook_id);
 		run = false;
+		current_frequency = 0;
 	    if (this.timer_graph != null) {
 	        try {
 		        this.timer_graph.cancel();
@@ -104,8 +132,54 @@ public class FeedMonitor extends ResponseHandler{
 	    	    logger.error("", e);
 	        }
 	    }
+	    if (this.timer_timeout != null) {
+	        try {
+		        this.timer_timeout.cancel();
+		        this.timer_timeout = null;
+	        } catch (Exception e) {
+	    	    logger.error("", e);
+	        }
+	    }
 	    post_list.clear();
 	    comment_cache.clear();
+	}
+	
+	private void checkTimerTimeout(final long delay){
+		if(timer_timeout==null){
+			start(monitor_frequency);
+			timer_timeout = org.jcommon.com.util.thread.TimerTaskManger.instance().schedule("FeedMonitor-Timeout", new TimerTask(){
+
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+					timer_timeout = null;
+					long now = System.currentTimeMillis();
+					if(now - the_last_update > delay){
+						start(monitor_frequency * 9);
+					}else{
+						long lay = (now + 1000 * 60 * 15) - the_last_update;
+						checkTimerTimeout(lay);
+					}
+				}
+				
+			}, delay);
+		}
+	}
+	
+	private void onFeed(Feed feed){
+		the_last_update = System.currentTimeMillis();
+		if(feed!=null && listener!=null){
+			listener.onFeed(feed);
+			checkTimerTimeout(1000 * 60 * 15);
+		}
+	}
+	
+	private void onComment(Feed feed, List<Comment> comments){
+		the_last_update = System.currentTimeMillis();
+		if(listener!=null){
+			listener.onComment(feed, comments);
+			checkTimerTimeout(1000 * 60 * 15);
+		}
 	}
 	
 	@Override
@@ -134,9 +208,7 @@ public class FeedMonitor extends ResponseHandler{
 				}
 				if(paramObject instanceof Feed){
 					Feed feed = (Feed) paramObject;
-					if(feed!=null && listener!=null){
-						listener.onFeed(feed);
-					}
+					onFeed(feed);
 				}else{
 					logger.warn("error class type:"+paramObject);
 				}
@@ -196,8 +268,7 @@ public class FeedMonitor extends ResponseHandler{
 			List<Comment> comments = commentHandler(feed,data,updated_time);
 			if(comments.size()>0){
 				logger.info("comments size:"+comments.size());
-				if(listener!=null)
-					listener.onComment(feed, comments);
+				onComment(feed, comments);
 			}else{
 				logger.info("no new comment come");
 			}
@@ -242,7 +313,7 @@ public class FeedMonitor extends ResponseHandler{
 		HttpRequest re = RequestFactory.feedUpdateReqeust(this, feed_id, access_token);
 		addHandlerObject(re, FeedUpdate.class);
  	    re.setAttribute(request_type, feed_update_request);
- 	    ThreadManager.instance().execute(re);
+ 	    session.execute(re);
 	}
 	
 	public synchronized void checkFeedUpdate(FeedUpdate feed, boolean check_comment_only){
@@ -258,7 +329,7 @@ public class FeedMonitor extends ResponseHandler{
 			HttpRequest re = RequestFactory.feedDetailRequest(this, id, access_token);
     	    FeedMonitor.this.addHandlerObject(re, Feed.class);
     	    re.setAttribute(request_type, feed_detail_request);
-    	    ThreadManager.instance().execute(re);
+    	    session.execute(re);
 		}else if(post_list.containsKey(id)){
 			updated_time_cache = post_list.get(id);
 		}
@@ -274,7 +345,7 @@ public class FeedMonitor extends ResponseHandler{
 	    	    FeedMonitor.this.addHandlerObject(re, Feed.class);
 	    	    re.setAttribute(request_type, commnet_request);
 	    	    re.setAttribute(comment_cache_updated, updated_time_cache);
-	    	    ThreadManager.instance().execute(re);
+	    	    session.execute(re);
 			}else{
 				logger.info("Feed comment data is Empty");
 			}
@@ -318,5 +389,13 @@ public class FeedMonitor extends ResponseHandler{
 		if (StatusManager.instance() != null)
 			StatusManager.instance().addStatus(this.status);
 	 }
+
+	public FacebookSession getSession() {
+		return session;
+	}
+
+	public void setSession(FacebookSession session) {
+		this.session = session;
+	}
 
 }

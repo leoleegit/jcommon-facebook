@@ -15,7 +15,6 @@ public class JsonObject extends org.jcommon.com.util.JsonObject{
 		// TODO Auto-generated method stub
 		
 	}
-	
 
 	public Error getError() {
 		return error;

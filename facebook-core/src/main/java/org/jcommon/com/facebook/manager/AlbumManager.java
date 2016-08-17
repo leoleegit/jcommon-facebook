@@ -44,7 +44,7 @@ public class AlbumManager extends ResponseHandler{
 		logger.info(facebook_id);
 		HttpRequest re = RequestFactory.getAlbumRequest(this, facebook_id, access_token.getAccess_token());
  	    addHandlerObject(re, Album.class);
- 	    FacebookSession.execute(re);
+ 	    session.execute(re);
 	}
 	
 	public Album getAlbum(AlbumType type){

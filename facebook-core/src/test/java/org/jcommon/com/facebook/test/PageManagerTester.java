@@ -162,10 +162,10 @@ public class PageManagerTester extends ResponseHandler implements FacebookSessio
 	@Override
 	public void startup() {
 		// TODO Auto-generated method stub
-		String facebook_id   = "271039552948235";
-		String access_token  = "CAACpWxUfDVwBAJhKoNZATZBvhLqa25vTnmrqXkxMuGmNdrEYdkQlNs2i9o3WyZBMPZAatxii0Mj9VDQvqkVgkrZBIpOZA9UlqZAtVrStTyhvLzULmkKD1PIu9ZB1wX1QaiPZCLNDqX22vQwerU8xPLMGt5KB0DNFO00NYQAIEi8e5UotcZATxoAt0d";
+		String facebook_id   = "882148571903890";
+		String access_token  = "EAACZAGu9RCzsBAGkiA5cMyEJuCrF0DPWAMhva4PtePa8egZCnFQfDtdrQJkhqRNtmgWh7P9gE0C1rRmjg6m8CBIMcECLNUJmtN0ZAQkTd2TRrQgApZCWVvFRJ1rEu08lrv999zEgw3IdZAVtqqYsjKGMebiOI3l3kTa2SRjZAHrwZDZD";
 		listener= new PageManagerTester();
-		session = new FacebookSession(listener, facebook_id, access_token, FacebookType.page);
+		session = new FacebookSession(listener, facebook_id, access_token, FacebookType.message);
 		session.startup();
 		
 	}

@@ -65,8 +65,33 @@ public class FacebookManager extends Monitor{
 		    		new MBeanParameterInfo("verify_token", "java.lang.String", "facebook app verify_token"), 
 		    		new MBeanParameterInfo("permissions", "java.lang.String", "facebook app reqeuest permissions") }, 
 		    		"void", 1));
+		 addOperation(new MBeanOperationInfo("refreshStatus", "Refresh facebook status", new MBeanParameterInfo[] { 			 
+		 }, 
+		    		"void", 1));
+		 addOperation(new MBeanOperationInfo("updateFrequency", "updateFrequency", new MBeanParameterInfo[] { 
+		    		new MBeanParameterInfo("fb_id", "java.lang.String", "facebook app_id"), 
+		    		new MBeanParameterInfo("frequency", "java.lang.Long", "facebook frequency") }, 
+		    		"void", 1));
 	}
 
+	public void refreshStatus(){
+		super.properties.clear();
+		for(FacebookSession session : facebookSessions.values()){
+			super.addProperties(session.getFacebook_id(), session.getStatus());
+		}
+	}
+	
+	public void updateFrequency(String fb_id, long frequency){
+		logger.info(String.format("fb_id:%s;frequency:%s", fb_id,frequency));
+		if(facebookSessions.containsKey(fb_id)){
+			FacebookSession session = facebookSessions.get(fb_id);
+			if(frequency>5000)
+				session.updateFrequency(frequency);
+		}else{
+			logger.info("can not found facebook session : "+fb_id);
+		}
+	}
+	
 	public FacebookConfig getFacebookConfig() {
 		if(facebookConfig==null){
 			facebookConfig = new FacebookConfig();
@@ -172,6 +197,7 @@ public class FacebookManager extends Monitor{
 				removeFacebookSession(session_);
 			}
 			facebookSessions.put(session.getFacebook_id(), session);
+			super.addProperties(session.getFacebook_id(), session.getStatus());
 		}
 	}
 	
@@ -188,8 +214,14 @@ public class FacebookManager extends Monitor{
 	}
 	
 	public FacebookSession removeFacebookSession(String facebook_id){
-		if(facebook_id!=null && facebookSessions.containsKey(facebook_id))
+		if(facebook_id!=null && facebookSessions.containsKey(facebook_id)){
+			super.removeProperties(facebook_id);
 			return facebookSessions.remove(facebook_id);
+		}
 		return null;
+	}
+	
+	public AccessTokenManager getAccessTokenManager(){
+		return AccessTokenManager.instance();
 	}
 }

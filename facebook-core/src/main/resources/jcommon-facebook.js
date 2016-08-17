@@ -99,7 +99,7 @@ var jcommonfacebook = {
 		jcommonfacebook.getting = true;
 		$.ajax({
 			  type: "GET",
-			  url: request_jcommonfacebook_url + "?cmd=cmd_about_me&code="+code+"&redirect_uri="+redirect_uri,
+			  url: request_jcommonfacebook_url + "?cmd=cmd_about_me&app_name=spotlight_facebook_app&code="+code+"&redirect_uri="+redirect_uri,
 			  dataType: 'json',
 			  error: function error(jqXHR, textStatus, errorThrown){
 				  jcommonfacebook.getting  = false;

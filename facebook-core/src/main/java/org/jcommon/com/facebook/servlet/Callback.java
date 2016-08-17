@@ -94,6 +94,4 @@ public class Callback extends HttpServlet {
 	    //String hub_mode = request.getParameter("hub.mode");  
 	    FacebookManager.instance().onCallback(xml.toString());  
 	}
-	
-
 }

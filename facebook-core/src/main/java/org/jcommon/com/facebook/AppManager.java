@@ -6,6 +6,7 @@ import org.apache.log4j.Logger;
 import org.jcommon.com.facebook.object.AccessToken;
 import org.jcommon.com.facebook.object.App;
 import org.jcommon.com.facebook.object.User;
+import org.jcommon.com.facebook.permission.ExtendedPermissionV_2_5;
 import org.jcommon.com.util.collections.MapStore;
 import org.jcommon.com.util.http.HttpRequest;
 
@@ -20,7 +21,7 @@ public class AppManager extends MapStore{
 			logger.info("can not install a null app");
 			return false;
 		}
-		String id = app.getApi_id();
+		String id = app.getApp_id();
 		if(id==null){
 			logger.info("can not install a app with null ID");
 			return false;
@@ -35,6 +36,18 @@ public class AppManager extends MapStore{
 		}
 		if(super.hasKey(app_id))
 			return (App) super.getOne(app_id);
+		return null;
+	}
+	
+	public App getAppByName(String app_name){
+		if(app_name==null){
+			logger.info("app name can not be null");
+			return null;
+		}
+		for(App app : getApps()){
+			if(app_name.equals(app.getApp_name()))
+				return app;
+		}
 		return null;
 	}
 	
@@ -87,7 +100,15 @@ public class AppManager extends MapStore{
 			logger.info("app not be null");
 			return null;
 		}
-		return RequestFactory.getAccessCodeUrl(redirect_uri, app.getPermissionsStr(), app.getApi_id());
+		return RequestFactory.getAccessCodeUrl(redirect_uri, app.getPermission_str(), app.getApp_id());
+	}
+	
+	public static String getPageAccessCodeUrl(App app, String redirect_uri){
+		if(app==null){
+			logger.info("app not be null");
+			return null;
+		}
+		return RequestFactory.getAccessCodeUrl(redirect_uri, ExtendedPermissionV_2_5.manage_pages.name(), app.getApp_id());
 	}
 	
 	public static List<AccessToken> getAccessTokenList(AccessToken access_token){
@@ -110,7 +131,7 @@ public class AppManager extends MapStore{
 			return null;
 		}
 		
-		HttpRequest facebook_request = RequestFactory.getAccessTokenReqeust(null,app.getApi_id(),app.getApp_secret(),code,redirect_uri);
+		HttpRequest facebook_request = RequestFactory.getAccessTokenReqeust(null,app.getApp_id(),app.getApp_secret(),code,redirect_uri);
         facebook_request.run();
         String access_token_ = facebook_request.getResult();
         logger.info("Result:" + access_token_);

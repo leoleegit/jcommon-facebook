@@ -1,5 +1,6 @@
 package org.jcommon.com.facebook.permission;
 
+
 public enum ExtendedPermissionV_2_5 implements Permission {
 	ads_management,
 	
@@ -27,5 +28,10 @@ public enum ExtendedPermissionV_2_5 implements Permission {
 	
 	read_page_mailboxes,
 	
-	rsvp_event
+	rsvp_event;
+
+	
+	public static Permission[] list() {
+	    return ExtendedPermissionV_2_5.class.getEnumConstants();
+	}
 }
