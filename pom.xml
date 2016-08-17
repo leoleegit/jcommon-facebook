@@ -1,13 +1,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>jcommon-facebook</groupId>
-  <artifactId>facebook</artifactId>
-  <version>1.0-v20151102</version>
+  <groupId>jcommon</groupId>
+  <artifactId>jcommon-facebook</artifactId>
+  <version>1.0-v20160817</version>
   <packaging>pom</packaging>
   
   <modules>
     <module>facebook-core</module>
+	<module>facebook-manage</module>
   </modules>
   
   <name>jcommon facebook</name>
